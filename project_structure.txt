@@ -1,0 +1,37 @@
+# 项目结构
+
+knowledge_graph_system/
+├── frontend/                 # 前端Vue3项目
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/           # 静态资源
+│   │   ├── components/       # 通用组件
+│   │   ├── router/           # 路由配置
+│   │   ├── store/            # 状态管理
+│   │   ├── views/            # 页面视图
+│   │   ├── services/         # API服务
+│   │   ├── utils/            # 工具函数
+│   │   ├── App.vue
+│   │   └── main.js
+│   ├── package.json
+│   └── vite.config.js
+│
+├── backend/                  # 后端FastAPI项目
+│   ├── .env                  # 环境变量配置
+│   ├── main.py               # 应用入口
+│   ├── requirements.txt      # 依赖包
+│   ├── app/
+│   │   ├── api/              # API路由
+│   │   │   ├── v1/
+│   │   │   │   ├── routers/  # 各模块路由
+│   │   │   │   └── api.py    # 路由汇总
+│   │   ├── algorithm/        # 算法模块
+│   │   │   ├── preprocess/   # 数据预处理算法
+│   │   │   ├── extraction/   # 信息抽取算法
+│   │   │   ├── fusion/       # 知识融合算法
+│   │   │   └── completion/   # 知识补全算法
+│   │   ├── service/          # 业务逻辑服务
+│   │   ├── models/           # 数据模型
+│   │   ├── core/             # 核心配置
+│   │   └── utils/            # 工具函数
+│   └── tests/                # 测试用例
