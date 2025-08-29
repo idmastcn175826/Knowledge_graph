@@ -1,591 +1,344 @@
 <template>
   <div class="kg-create-container">
-    <el-card>
-      <div slot="header">
-        <h2>创建知识图谱</h2>
-        <p>上传文件并选择算法，构建您的专属知识图谱</p>
+    <!-- 页面标题和导航 -->
+    <div class="page-header">
+      <h2>创建知识图谱</h2>
+      <button @click="goBack" class="back-btn">返回首页</button>
+    </div>
+
+    <!-- 图谱配置区域 -->
+    <div class="config-section mt-4">
+      <div class="form-group">
+        <label>图谱名称：</label>
+        <input
+          v-model="graphName"
+          type="text"
+          placeholder="请输入图谱名称"
+          class="input-field"
+        >
       </div>
-      
-      <el-steps :active="activeStep" finish-status="success" class="steps">
-        <el-step title="选择文件"></el-step>
-        <el-step title="选择算法"></el-step>
-        <el-step title="模型配置"></el-step>
-        <el-step title="开始构建"></el-step>
-      </el-steps>
-      
-      <div class="step-content">
-        <!-- 步骤1: 选择文件 -->
-        <div v-if="activeStep === 0" class="step-file-selection">
-          <el-upload
-            class="upload-files"
-            action=""
-            :auto-upload="false"
-            :on-change="handleFileChange"
-            :file-list="fileList"
-            :limit="10"
-            multiple
-            accept=".txt,.pdf,.doc,.docx,.xls,.xlsx"
+
+      <!-- 节点添加区域 -->
+      <div class="node-section mt-4">
+        <h3>添加节点</h3>
+        <div class="form-group">
+          <label>节点标签：</label>
+          <input
+            v-model="newNode.label"
+            type="text"
+            placeholder="比如：人工智能"
+            class="input-field"
           >
-            <el-button size="default" type="primary">
-              <el-icon><upload-filled /></el-icon> 选择文件
-            </el-button>
-            <template #tip>
-              <div class="el-upload__tip">
-                支持上传 txt, pdf, doc, docx, xls, xlsx 格式文件，最多10个
-              </div>
-            </template>
-          </el-upload>
-          
-          <div v-if="fileList.length > 0" class="selected-files">
-            <h3>已选择文件:</h3>
-            <el-table :data="fileList" border>
-              <el-table-column prop="name" label="文件名" width="300"></el-table-column>
-              <el-table-column prop="size" label="大小" width="100">
-                <template #default="scope">
-                  {{ formatFileSize(scope.row.size) }}
-                </template>
-              </el-table-column>
-              <el-table-column prop="raw.type" label="类型" width="100"></el-table-column>
-              <el-table-column label="操作" width="100">
-                <template #default="scope">
-                  <el-button 
-                    icon="Delete" 
-                    type="text" 
-                    @click="handleRemoveFile(scope.$index)"
-                    size="small"
-                  ></el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
         </div>
-        
-        <!-- 步骤2: 选择算法 -->
-        <div v-if="activeStep === 1" class="step-algorithm-selection">
-          <el-form :model="algorithmForm" label-width="150px">
-            <el-form-item label="数据预处理算法:">
-              <el-select 
-                v-model="algorithmForm.preprocess" 
-                placeholder="请选择预处理算法"
-              >
-                <el-option label="SimHash去重" value="simhash"></el-option>
-                <el-option label="MinHash去重" value="minhash"></el-option>
-              </el-select>
-            </el-form-item>
-            
-            <el-form-item label="实体抽取算法:">
-              <el-select 
-                v-model="algorithmForm.entity_extraction" 
-                placeholder="请选择实体抽取算法"
-              >
-                <el-option label="BERT模型" value="bert"></el-option>
-                <el-option label="CRF模型" value="crf"></el-option>
-                <el-option label="Qwen模型" value="qwen"></el-option>
-              </el-select>
-            </el-form-item>
-            
-            <el-form-item label="关系抽取算法:">
-              <el-select 
-                v-model="algorithmForm.relation_extraction" 
-                placeholder="请选择关系抽取算法"
-              >
-                <el-option label="BiLSTM+Attention" value="bilstm"></el-option>
-                <el-option label="Qwen模型" value="qwen"></el-option>
-              </el-select>
-            </el-form-item>
-            
-            <el-form-item label="知识补全算法:">
-              <el-select 
-                v-model="algorithmForm.knowledge_completion" 
-                placeholder="请选择知识补全算法"
-              >
-                <el-option label="TransE" value="transe"></el-option>
-                <el-option label="TransH" value="transh"></el-option>
-                <el-option label="RotatE" value="rotate"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-form>
+        <div class="form-group">
+          <label>节点类型：</label>
+          <input
+            v-model="newNode.type"
+            type="text"
+            placeholder="比如：概念"
+            class="input-field"
+          >
         </div>
-        
-        <!-- 步骤3: 模型配置 -->
-        <div v-if="activeStep === 2" class="step-model-configuration">
-          <el-form :model="modelForm" label-width="150px">
-            <el-form-item label="知识图谱名称:">
-              <el-input 
-                v-model="modelForm.kg_name" 
-                placeholder="请输入知识图谱名称"
-                maxlength="50"
-              ></el-input>
-            </el-form-item>
-            
-            <el-form-item label="Qwen API Key:">
-              <el-input 
-                v-model="modelForm.api_key" 
-                placeholder="请输入Qwen API Key，不输入则使用默认"
-                type="password"
-                show-password
-              ></el-input>
-              <el-tooltip effect="dark" content="您可以在Qwen控制台获取API Key" placement="top">
-                <el-icon class="info-icon"><question-filled /></el-icon>
-              </el-tooltip>
-            </el-form-item>
-            
-            <el-form-item label="模型版本:">
-              <el-select 
-                v-model="modelForm.model_version" 
-                placeholder="请选择模型版本"
-              >
-                <el-option label="Qwen-7B" value="qwen-7b"></el-option>
-                <el-option label="Qwen-14B" value="qwen-14b"></el-option>
-                <el-option label="Qwen-Plus" value="qwen-plus"></el-option>
-              </el-select>
-            </el-form-item>
-            
-            <el-form-item label="构建选项:">
-              <el-checkbox v-model="modelForm.enable_completion">启用知识补全</el-checkbox>
-              <el-checkbox v-model="modelForm.enable_visualization">自动生成可视化</el-checkbox>
-            </el-form-item>
-          </el-form>
-        </div>
-        
-        <!-- 步骤4: 构建进度 -->
-        <div v-if="activeStep === 3" class="step-building-progress">
-          <div v-if="!isBuilding && !buildSuccess && !buildFailed" class="build-prepare">
-            <h3>构建参数确认</h3>
-            <el-descriptions column="1" border>
-              <el-descriptions-item label="知识图谱名称">{{ modelForm.kg_name }}</el-descriptions-item>
-              <el-descriptions-item label="文件数量">{{ fileList.length }} 个</el-descriptions-item>
-              <el-descriptions-item label="实体抽取算法">{{ getAlgorithmName('entity_extraction', algorithmForm.entity_extraction) }}</el-descriptions-item>
-              <el-descriptions-item label="关系抽取算法">{{ getAlgorithmName('relation_extraction', algorithmForm.relation_extraction) }}</el-descriptions-item>
-              <el-descriptions-item label="使用模型">{{ modelForm.model_version }}</el-descriptions-item>
-            </el-descriptions>
-            
-            <el-button 
-              type="primary" 
-              size="large"
-              @click="startBuilding"
-              :loading="isPreparing"
-            >
-              开始构建知识图谱
-            </el-button>
-          </div>
-          
-          <div v-if="isBuilding" class="building-in-progress">
-            <el-progress 
-              :percentage="buildProgress" 
-              :stroke-width="8"
-              status="active"
-            ></el-progress>
-            <p class="progress-text">
-              正在构建知识图谱... {{ buildProgress }}%
-            </p>
-            <p class="progress-stage">{{ currentStage }}</p>
-            
-            <el-button 
-              type="warning" 
-              @click="cancelBuilding"
-              v-if="!isCanceling"
-            >
-              取消构建
-            </el-button>
-            <el-button 
-              loading
-              v-if="isCanceling"
-            >
-              取消中...
-            </el-button>
-          </div>
-          
-          <div v-if="buildSuccess" class="build-success">
-            <el Result
-              icon="SuccessFilled"
-              title="知识图谱构建成功"
-              sub-title="您的知识图谱已成功创建，可以开始查询和对话了"
-            >
-              <template #extra>
-                <el-button type="primary" @click="gotoKGView">
-                  查看知识图谱
-                </el-button>
-                <el-button @click="gotoQAChat">
-                  开始对话
-                </el-button>
-              </template>
-            </el Result>
-          </div>
-          
-          <div v-if="buildFailed" class="build-failed">
-            <el Result
-              icon="ErrorFilled"
-              title="知识图谱构建失败"
-              :sub-title="errorMessage || '构建过程中发生错误，请稍后重试'"
-            >
-              <template #extra>
-                <el-button type="primary" @click="restartBuilding">
-                  重新构建
-                </el-button>
-                <el-button @click="goBack">
-                  返回
-                </el-button>
-              </template>
-            </el Result>
-          </div>
-        </div>
+        <button @click="addNode" class="operate-btn">添加节点</button>
       </div>
-      
-      <div class="step-actions">
-        <el-button 
-          @click="prevStep"
-          v-if="activeStep > 0 && !(activeStep === 3 && (isBuilding || buildSuccess || buildFailed))"
-        >
-          上一步
-        </el-button>
-        <el-button 
-          type="primary" 
-          @click="nextStep"
-          v-if="activeStep < 3 && canProceed"
-        >
-          下一步
-        </el-button>
+
+      <!-- 关系添加区域 -->
+      <div class="edge-section mt-4">
+        <h3>添加关系</h3>
+        <div class="form-group">
+          <label>源节点：</label>
+          <select v-model="newEdge.from" class="select-field">
+            <option value="">选择源节点</option>
+            <option v-for="node in nodes" :key="node.id" :value="node.id">
+              {{ node.label }} ({{ node.type }})
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>关系标签：</label>
+          <input
+            v-model="newEdge.label"
+            type="text"
+            placeholder="比如：包含"
+            class="input-field"
+          >
+        </div>
+        <div class="form-group">
+          <label>目标节点：</label>
+          <select v-model="newEdge.to" class="select-field">
+            <option value="">选择目标节点</option>
+            <option v-for="node in nodes" :key="node.id" :value="node.id">
+              {{ node.label }} ({{ node.type }})
+            </option>
+          </select>
+        </div>
+        <button @click="addEdge" class="operate-btn">添加关系</button>
       </div>
-    </el-card>
+
+      <!-- 提交图谱按钮 -->
+      <button
+        @click="submitGraph"
+        class="submit-btn mt-6"
+        :disabled="!graphName || nodes.length === 0"
+      >
+        保存知识图谱
+      </button>
+    </div>
+
+    <!-- 图谱预览区域 -->
+    <div class="graph-preview mt-6">
+      <h3>图谱预览</h3>
+      <div id="graph-container" class="graph-container"></div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { 
-  UploadFilled, 
-  Delete, 
-  QuestionFilled,
-  SuccessFilled,
-  ErrorFilled
-} from '@element-plus/icons-vue';
-import { uploadFiles, createKG, getKGProgress } from '@/services/kgService';
+// 1. 引入依赖
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { Network } from 'vis-network' // 引入 vis-network 的 Network 类
+import { DataSet } from 'vis-data'    // 引入 vis-data 的 DataSet 类（用于管理节点/关系数据）
 
-const router = useRouter();
+// 2. 路由实例（用于页面跳转）
+const router = useRouter()
 
-// 步骤控制
-const activeStep = ref(0);
-const fileList = ref([]);
-const uploadProgress = ref(0);
+// 3. 响应式数据（图谱配置相关）
+const graphName = ref('') // 图谱名称
+const nodes = ref(new DataSet([])) // 节点数据集（vis-data 的 DataSet 类型）
+const edges = ref(new DataSet([])) // 关系数据集
+let network = ref(null) // 图谱实例（用 let 而非 ref，因为是复杂对象）
 
-// 表单数据
-const algorithmForm = ref({
-  preprocess: 'simhash',
-  entity_extraction: 'bert',
-  relation_extraction: 'qwen',
-  knowledge_completion: 'transe'
-});
+// 新节点表单数据
+const newNode = ref({
+  label: '',
+  type: ''
+})
 
-const modelForm = ref({
-  kg_name: '',
-  api_key: '',
-  model_version: 'qwen-plus',
-  enable_completion: true,
-  enable_visualization: true
-});
+// 新关系表单数据
+const newEdge = ref({
+  from: '',
+  to: '',
+  label: ''
+})
 
-// 构建状态
-const isBuilding = ref(false);
-const isPreparing = ref(false);
-const isCanceling = ref(false);
-const buildProgress = ref(0);
-const currentStage = ref('准备中...');
-const buildSuccess = ref(false);
-const buildFailed = ref(false);
-const errorMessage = ref('');
-const taskId = ref('');
-const progressInterval = ref(null);
-
-// 算法名称映射
-const algorithmNames = {
-  preprocess: {
-    'simhash': 'SimHash去重',
-    'minhash': 'MinHash去重'
-  },
-  entity_extraction: {
-    'bert': 'BERT模型',
-    'crf': 'CRF模型',
-    'qwen': 'Qwen模型'
-  },
-  relation_extraction: {
-    'bilstm': 'BiLSTM+Attention',
-    'qwen': 'Qwen模型'
-  },
-  knowledge_completion: {
-    'transe': 'TransE',
-    'transh': 'TransH',
-    'rotate': 'RotatE'
-  }
-};
-
-// 处理文件选择
-const handleFileChange = (file, fileList) => {
-  // 过滤重复文件
-  const uniqueFiles = [];
-  const fileNames = new Set();
-  
-  fileList.forEach(f => {
-    if (!fileNames.has(f.name)) {
-      fileNames.add(f.name);
-      uniqueFiles.push(f);
-    }
-  });
-  
-  fileList.value = uniqueFiles;
-};
-
-// 移除文件
-const handleRemoveFile = (index) => {
-  fileList.value.splice(index, 1);
-};
-
-// 格式化文件大小
-const formatFileSize = (size) => {
-  if (size < 1024) {
-    return `${size} B`;
-  } else if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(1)} KB`;
-  } else {
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-  }
-};
-
-// 检查是否可以进入下一步
-const canProceed = computed(() => {
-  if (activeStep.value === 0) {
-    return fileList.value.length > 0;
-  } else if (activeStep.value === 1) {
-    return true; // 算法都有默认值
-  } else if (activeStep.value === 2) {
-    return modelForm.value.kg_name.trim() !== '';
-  }
-  return false;
-});
-
-// 上一步
-const prevStep = () => {
-  if (activeStep.value > 0) {
-    activeStep.value--;
-  }
-};
-
-// 下一步
-const nextStep = () => {
-  if (activeStep.value < 3) {
-    activeStep.value++;
-  }
-};
-
-// 获取算法名称
-const getAlgorithmName = (type, value) => {
-  return algorithmNames[type]?.[value] || value;
-};
-
-// 开始构建
-const startBuilding = async () => {
-  try {
-    isPreparing.value = true;
-    
-    // 1. 上传文件
-    const fileIds = [];
-    for (const file of fileList.value) {
-      const result = await uploadFiles(file.raw);
-      fileIds.push(result.file_id);
-    }
-    
-    // 2. 创建知识图谱任务
-    const response = await createKG({
-      file_ids: fileIds,
-      algorithms: algorithmForm.value,
-      model_api_key: modelForm.value.api_key || null,
-      kg_name: modelForm.value.kg_name
-    });
-    
-    taskId.value = response.task_id;
-    isBuilding.value = true;
-    isPreparing.value = false;
-    
-    // 3. 轮询获取进度
-    checkProgress();
-    progressInterval.value = setInterval(checkProgress, 3000);
-    
-  } catch (error) {
-    console.error('构建知识图谱失败:', error);
-    isPreparing.value = false;
-    buildFailed.value = true;
-    errorMessage.value = error.message || '构建知识图谱失败，请重试';
-  }
-};
-
-// 检查进度
-const checkProgress = async () => {
-  try {
-    const response = await getKGProgress(taskId.value);
-    
-    buildProgress.value = response.progress;
-    
-    // 更新当前阶段
-    updateCurrentStage(buildProgress.value);
-    
-    if (response.status === 'completed') {
-      clearInterval(progressInterval.value);
-      isBuilding.value = false;
-      buildSuccess.value = true;
-    } else if (response.status === 'failed') {
-      clearInterval(progressInterval.value);
-      isBuilding.value = false;
-      buildFailed.value = true;
-      errorMessage.value = response.message || '构建失败';
-    }
-  } catch (error) {
-    console.error('获取进度失败:', error);
-  }
-};
-
-// 更新当前阶段
-const updateCurrentStage = (progress) => {
-  if (progress < 5) {
-    currentStage.value = '准备中...';
-  } else if (progress < 15) {
-    currentStage.value = '正在解析文件...';
-  } else if (progress < 25) {
-    currentStage.value = '正在预处理数据...';
-  } else if (progress < 40) {
-    currentStage.value = '正在抽取实体...';
-  } else if (progress < 55) {
-    currentStage.value = '正在抽取关系...';
-  } else if (progress < 60) {
-    currentStage.value = '正在进行实体对齐...';
-  } else if (progress < 90) {
-    currentStage.value = '正在补全知识并存储到数据库...';
-  } else if (progress < 100) {
-    currentStage.value = '正在完成最后的处理...';
-  } else {
-    currentStage.value = '构建完成!';
-  }
-};
-
-// 取消构建
-const cancelBuilding = async () => {
-  isCanceling.value = true;
-  // 实际应用中应该调用API取消任务
-  setTimeout(() => {
-    clearInterval(progressInterval.value);
-    isBuilding.value = false;
-    isCanceling.value = false;
-    buildFailed.value = true;
-    errorMessage.value = '已取消构建';
-  }, 1000);
-};
-
-// 重新构建
-const restartBuilding = () => {
-  buildSuccess.value = false;
-  buildFailed.value = false;
-  buildProgress.value = 0;
-  taskId.value = '';
-};
-
-// 返回
-const goBack = () => {
-  buildSuccess.value = false;
-  buildFailed.value = false;
-  buildProgress.value = 0;
-  taskId.value = '';
-  activeStep.value = 0;
-};
-
-// 前往图谱查看
-const gotoKGView = () => {
-  router.push({
-    path: '/kg/view',
-    query: { taskId: taskId.value }
-  });
-};
-
-// 前往问答对话
-const gotoQAChat = () => {
-  router.push({
-    path: '/qa/chat',
-    query: { kgId: taskId.value }
-  });
-};
-
-// 组件卸载时清理
+// 4. 页面挂载时初始化图谱
 onMounted(() => {
-  return () => {
-    if (progressInterval.value) {
-      clearInterval(progressInterval.value);
+  initNetwork()
+})
+
+// 5. 页面卸载时销毁图谱（避免内存泄漏）
+onUnmounted(() => {
+  if (network.value) {
+    network.value.destroy()
+  }
+})
+
+// 6. 图谱初始化函数
+const initNetwork = () => {
+  // 获取图谱容器 DOM 元素
+  const container = document.getElementById('graph-container')
+  if (!container) return
+
+  // 图谱数据（关联 nodes 和 edges 的 DataSet）
+  const data = {
+    nodes: nodes.value,
+    edges: edges.value
+  }
+
+  // 图谱配置项（样式、交互等）
+  const options = {
+    nodes: {
+      shape: 'ellipse',
+      size: 25,
+      font: {
+        size: 14,
+        color: '#fff'
+      },
+      color: {
+        background: '#42b983',
+        border: '#359469'
+      }
+    },
+    edges: {
+      font: {
+        size: 12,
+        color: '#333'
+      },
+      color: '#999',
+      arrows: {
+        to: { enabled: true, type: 'arrow' }
+      }
+    },
+    interaction: {
+      dragNodes: true,    // 允许拖动节点
+      zoomView: true,     // 允许缩放视图
+      panView: true       // 允许平移视图
+    },
+    layout: {
+      randomSeed: 2,      // 固定布局种子（避免每次加载位置变化）
+      improvedLayout: true
     }
-  };
-});
+  }
+
+  // 创建图谱实例
+  network.value = new Network(container, data, options)
+}
+
+// 7. 添加节点函数
+const addNode = () => {
+  if (!newNode.value.label || !newNode.value.type) {
+    alert('请填写节点标签和类型！')
+    return
+  }
+
+  // 生成唯一节点 ID（用时间戳确保不重复）
+  const nodeId = Date.now()
+  // 添加节点到 DataSet
+  nodes.value.add({
+    id: nodeId,
+    label: newNode.value.label,
+    type: newNode.value.type
+  })
+
+  // 重置表单
+  newNode.value = { label: '', type: '' }
+}
+
+// 8. 添加关系函数
+const addEdge = () => {
+  if (!newEdge.value.from || !newEdge.value.to || !newEdge.value.label) {
+    alert('请选择源节点、目标节点，并填写关系标签！')
+    return
+  }
+
+  // 生成唯一关系 ID
+  const edgeId = `edge_${Date.now()}`
+  // 添加关系到 DataSet
+  edges.value.add({
+    id: edgeId,
+    from: Number(newEdge.value.from), // 转成数字（和节点 ID 类型一致）
+    to: Number(newEdge.value.to),
+    label: newEdge.value.label
+  })
+
+  // 重置表单
+  newEdge.value = { from: '', to: '', label: '' }
+}
+
+// 9. 提交图谱函数（这里仅做前端演示，实际需调用后端接口）
+const submitGraph = () => {
+  // 模拟提交成功（实际项目中替换为 axios 调用后端 API）
+  alert(`图谱 "${graphName.value}" 创建成功！`)
+  // 提交后跳转到图谱查看页
+  router.push('/kg/view')
+}
+
+// 10. 返回首页函数
+const goBack = () => {
+  router.push('/')
+}
 </script>
 
 <style scoped>
+/* 页面容器样式 */
 .kg-create-container {
+  padding: 2rem;
   max-width: 1200px;
-  margin: 20px auto;
-  padding: 0 20px;
+  margin: 0 auto;
 }
 
-.steps {
-  margin: 30px 0;
+/* 页面头部样式 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.step-content {
-  margin: 40px 0;
-  min-height: 300px;
+.back-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #42b983;
+  border-radius: 4px;
+  background: transparent;
+  color: #42b983;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-.step-file-selection,
-.step-algorithm-selection,
-.step-model-configuration,
-.step-building-progress {
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
+.back-btn:hover {
+  background: #42b983;
+  color: #fff;
 }
 
-.upload-files {
-  margin-bottom: 30px;
+/* 表单区域样式 */
+.form-group {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.selected-files {
-  margin-top: 20px;
-}
-
-.step-actions {
-  margin-top: 30px;
+.form-group label {
+  width: 100px;
   text-align: right;
+  font-weight: 500;
 }
 
-.building-in-progress {
-  text-align: center;
-  padding: 40px 0;
+.input-field, .select-field {
+  flex: 1;
+  max-width: 300px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
-.progress-text {
-  margin: 20px 0;
-  font-size: 16px;
+/* 按钮样式 */
+.operate-btn {
+  padding: 0.5rem 1rem;
+  background: #42b983;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
-.progress-stage {
-  color: #666;
-  margin-top: 10px;
+.operate-btn:hover {
+  background: #359469;
 }
 
-.info-icon {
-  margin-left: 10px;
-  color: #666;
+.submit-btn {
+  padding: 0.6rem 1.2rem;
+  background: #2c3e50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
 }
 
-.build-prepare {
-  padding: 20px;
+.submit-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
 }
 
-.build-success, .build-failed {
-  margin-top: 40px;
+/* 图谱预览容器样式 */
+.graph-container {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+/* 辅助类 */
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-6 {
+  margin-top: 1.5rem;
 }
 </style>

@@ -1,11 +1,13 @@
 import logging
-from fastapi import APIRouter, Depends, UploadFile, File, Form
-from typing import List, Optional, Dict
-from app.service.kg_service import KGService
+from typing import Dict
+
+from fastapi import APIRouter, Depends
+
 from app.models.schema import (
-    KGCreateRequest, KGCreateResponse, 
+    KGCreateRequest, KGCreateResponse,
     KGProgressResponse, KGQueryRequest, KGQueryResponse
 )
+from app.service.kg_service import KGService
 from app.utils.auth import get_current_user
 
 router = APIRouter()

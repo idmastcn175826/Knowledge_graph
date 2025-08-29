@@ -1,11 +1,13 @@
 import logging
 import time
 import uuid
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
+
 import requests
+
+from app.algorithm.extraction.factory import EntityExtractionFactory
 from app.core.config import settings
 from app.service.kg_service import KGService
-from app.algorithm.extraction.factory import EntityExtractionFactory
 
 logger = logging.getLogger(__name__)
 

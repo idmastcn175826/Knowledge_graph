@@ -5,11 +5,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.api.v1.api import api_router
 from app.core.config import settings
-from app.utils.exceptions import APIException
+from app.utils.exceptions import (
+    APIException,
+    ResourceNotFoundError,
+    PermissionDeniedError,
+    InvalidParameterError,
+    AuthenticationError
+)
 
 # 配置日志
 logging.basicConfig(
-    level=settings.LOG_LEVEL,
+    level=settings.log_level,  # 2. 修复配置参数大小写（LOG_LEVEL -> log_level）
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
@@ -24,25 +30,30 @@ app = FastAPI(
 # 配置CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=settings.cors_origins,  # 3. 修复配置参数大小写（CORS_ORIGINS -> cors_origins）
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # 挂载静态文件目录
-app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
 
 # 注册API路由
-app.include_router(api_router, prefix=settings.API_PREFIX)
+app.include_router(api_router, prefix=settings.api_prefix)  # 这里已经是小写，正确
 
 # 全局异常处理
 @app.exception_handler(APIException)
 async def api_exception_handler(request: Request, exc: APIException):
     logger.error(f"API Exception: {exc.detail}")
+    # 4. 修复exc.data可能不存在的问题
     return JSONResponse(
         status_code=exc.status_code,
-        content={"code": exc.code, "message": exc.detail, "data": exc.data}
+        content={
+            "code": exc.code,
+            "message": exc.detail,
+            "data": getattr(exc, 'data', None)  # 使用getattr安全获取data属性
+        }
     )
 
 @app.exception_handler(Exception)

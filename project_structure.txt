@@ -1,15 +1,28 @@
-# 项目结构
-
 knowledge_graph_system/
 ├── frontend/                 # 前端Vue3项目
 │   ├── public/
 │   ├── src/
 │   │   ├── assets/           # 静态资源
 │   │   ├── components/       # 通用组件
+│   │   │   ├── common/       # 基础组件(按钮、输入框等)
+│   │   │   ├── kg/           # 知识图谱专用组件
+│   │   │   └── layout/       # 布局组件
 │   │   ├── router/           # 路由配置
 │   │   ├── store/            # 状态管理
+│   │   │   ├── modules/      # 模块状态
+│   │   │   ├── index.js
 │   │   ├── views/            # 页面视图
+│   │   │   ├── Home/         # 首页
+│   │   │   ├── Login/        # 登录页
+│   │   │   ├── KnowledgeGraph/ # 知识图谱页面
+│   │   │   ├── FileUpload/   # 文件上传页面
+│   │   │   └── QA/           # 问答页面
 │   │   ├── services/         # API服务
+│   │   │   ├── api.js        # 基础请求配置
+│   │   │   ├── user.js       # 用户相关接口
+│   │   │   ├── file.js       # 文件相关接口
+│   │   │   ├── kg.js         # 知识图谱相关接口
+│   │   │   └── qa.js         # 问答相关接口
 │   │   ├── utils/            # 工具函数
 │   │   ├── App.vue
 │   │   └── main.js
@@ -18,20 +31,60 @@ knowledge_graph_system/
 │
 ├── backend/                  # 后端FastAPI项目
 │   ├── .env                  # 环境变量配置
+│   ├── .env.example          # 环境变量示例
 │   ├── main.py               # 应用入口
 │   ├── requirements.txt      # 依赖包
+│   ├── requirements-dev.txt  # 开发环境依赖
 │   ├── app/
 │   │   ├── api/              # API路由
 │   │   │   ├── v1/
 │   │   │   │   ├── routers/  # 各模块路由
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── user.py
+│   │   │   │   │   ├── file.py
+│   │   │   │   │   ├── knowledge_graph.py
+│   │   │   │   │   └── qa.py
 │   │   │   │   └── api.py    # 路由汇总
 │   │   ├── algorithm/        # 算法模块
+│   │   │   ├── __init__.py
 │   │   │   ├── preprocess/   # 数据预处理算法
 │   │   │   ├── extraction/   # 信息抽取算法
 │   │   │   ├── fusion/       # 知识融合算法
 │   │   │   └── completion/   # 知识补全算法
 │   │   ├── service/          # 业务逻辑服务
+│   │   │   ├── __init__.py
+│   │   │   ├── user_service.py
+│   │   │   ├── file_service.py
+│   │   │   ├── kg_service.py
+│   │   │   └── qa_service.py
 │   │   ├── models/           # 数据模型
+│   │   │   ├── __init__.py
+│   │   │   ├── schema.py     # Pydantic模型
+│   │   │   ├── user.py       # 用户模型
+│   │   │   ├── file.py       # 文件模型
+│   │   │   └── task.py       # 任务模型
 │   │   ├── core/             # 核心配置
-│   │   └── utils/            # 工具函数
-│   └── tests/                # 测试用例
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py     # 配置文件
+│   │   │   └── security.py   # 安全配置
+│   │   ├── utils/            # 工具函数
+│   │   │   ├── __init__.py
+│   │   │   ├── db.py         # 数据库工具
+│   │   │   ├── auth.py       # 认证工具
+│   │   │   ├── exceptions.py # 异常处理
+│   │   │   └── common.py     # 通用工具
+│   │   ├── db/               # 数据库相关
+│   │   │   ├── __init__.py
+│   │   │   └── init_db.py    # 数据库初始化
+│   │   └── crud/             # 数据库操作
+│   │       ├── __init__.py
+│   │       ├── crud_user.py
+│   │       ├── crud_file.py
+│   │       └── crud_task.py
+│   ├── tests/                # 测试用例
+│   │   ├── __init__.py
+│   │   ├── test_user.py
+│   │   ├── test_file.py
+│   │   └── test_kg.py
+│   └── logs/                 # 日志目录
+

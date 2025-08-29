@@ -1,54 +1,55 @@
 import os
-from pathlib import Path
+from typing import List
+
 from dotenv import load_dotenv
-from pydantic import BaseSettings
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 # 加载环境变量
-env_path = Path(__file__).parent.parent.parent / ".env"
-if env_path.exists():
-    load_dotenv(env_path)
+load_dotenv()
+
 
 class Settings(BaseSettings):
-    # API配置
-    API_PREFIX: str = os.getenv("API_PREFIX", "/api/v1")
-    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
-    
-    # 跨域配置
-    CORS_ORIGINS: list = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
-    
-    # 路径配置
-    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")
-    TEMP_DIR: str = os.getenv("TEMP_DIR", "./temp")
-    
-    # 日志配置
-    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
-    
     # Neo4j配置
-    NEO4J_URI: str = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-    NEO4J_USER: str = os.getenv("NEO4J_USER", "neo4j")
-    NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD", "password")
-    
+    neo4j_uri: str = Field(default=os.getenv("NEO4J_URI"), env="NEO4J_URI")
+    neo4j_user: str = Field(default=os.getenv("NEO4J_USER"), env="NEO4J_USER")
+    neo4j_password: str = Field(default=os.getenv("NEO4J_PASSWORD"), env="NEO4J_PASSWORD")
+
     # Qwen模型配置
-    QWEN_DEFAULT_API_KEY: str = os.getenv("QWEN_DEFAULT_API_KEY", "")
-    QWEN_API_BASE_URL: str = os.getenv("QWEN_API_BASE_URL", "https://api.qwen.com/v1")
-    
+    qwen_default_api_key: str = Field(default=os.getenv("QWEN_DEFAULT_API_KEY"), env="QWEN_DEFAULT_API_KEY")
+    qwen_api_base_url: str = Field(default=os.getenv("QWEN_API_BASE_URL"), env="QWEN_API_BASE_URL")
+
+    # CORS配置
+    cors_origins: List[str] = Field(
+        default=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080"],
+        env="CORS_ORIGINS"
+    )
     # 数据库配置
-    MYSQL_HOST: str = os.getenv("MYSQL_HOST", "localhost")
-    MYSQL_PORT: int = int(os.getenv("MYSQL_PORT", "3306"))
-    MYSQL_USER: str = os.getenv("MYSQL_USER", "root")
-    MYSQL_PASSWORD: str = os.getenv("MYSQL_PASSWORD", "password")
-    MYSQL_DATABASE: str = os.getenv("MYSQL_DATABASE", "knowledge_graph")
-    
+    mysql_host: str = Field(default=os.getenv("MYSQL_HOST"), env="MYSQL_HOST")
+    mysql_port: int = Field(default=int(os.getenv("MYSQL_PORT", 3306)), env="MYSQL_PORT")
+    mysql_user: str = Field(default=os.getenv("MYSQL_USER"), env="MYSQL_USER")
+    mysql_password: str = Field(default=os.getenv("MYSQL_PASSWORD"), env="MYSQL_PASSWORD")
+    mysql_database: str = Field(default=os.getenv("MYSQL_DATABASE"), env="MYSQL_DATABASE")
+
     # JWT配置
-    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your-secret-key")
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "120"))
-    
+    jwt_secret_key: str = Field(default=os.getenv("JWT_SECRET_KEY"), env="JWT_SECRET_KEY")
+    jwt_access_token_expire_minutes: int = Field(default=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", 120)),
+                                                 env="JWT_ACCESS_TOKEN_EXPIRE_MINUTES")
+
+    # 应用配置
+    api_prefix: str = Field(default=os.getenv("API_PREFIX", "/api/v1"), env="API_PREFIX")
+    upload_dir: str = Field(default=os.getenv("UPLOAD_DIR", "./uploads"), env="UPLOAD_DIR")
+    temp_dir: str = Field(default=os.getenv("TEMP_DIR", "./temp"), env="TEMP_DIR")
+    log_level: str = Field(default=os.getenv("LOG_LEVEL", "INFO"), env="LOG_LEVEL")
+
+    # MySQL连接URL属性
+    @property
+    def mysql_url(self) -> str:
+        """生成MySQL连接URL"""
+        return f"mysql+pymysql://{self.mysql_user}:{self.mysql_password}@{self.mysql_host}:{self.mysql_port}/{self.mysql_database}?charset=utf8mb4"
+
     class Config:
         case_sensitive = True
 
-# 创建配置实例
-settings = Settings()
 
-# 确保目录存在
-Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
-Path(settings.TEMP_DIR).mkdir(parents=True, exist_ok=True)
+settings = Settings()

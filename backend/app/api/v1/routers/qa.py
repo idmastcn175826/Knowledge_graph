@@ -1,8 +1,10 @@
 import logging
+from typing import Dict, Optional
+
 from fastapi import APIRouter, Depends, Query
-from typing import List, Dict, Optional
-from app.service.qa_service import QAService
+
 from app.models.schema import QAQuery, QAAnswer, QAHistoryResponse
+from app.service.qa_service import QAService
 from app.utils.auth import get_current_user
 
 router = APIRouter()

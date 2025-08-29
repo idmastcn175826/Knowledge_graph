@@ -7,7 +7,38 @@ from app.algorithm.extraction.base import (
 from app.algorithm.extraction.bert_strategy import BERTEntityExtraction
 from app.algorithm.extraction.crf_strategy import CRFEntityExtraction
 from app.algorithm.extraction.qwen_strategy import QwenEntityExtraction, QwenRelationExtraction
+from app.algorithm.extraction.base import (
+    EntityExtractionStrategy,
+    RelationExtractionStrategy,
+    AttributeExtractionStrategy
+)
+from app.algorithm.extraction.crf_strategy import CRFEntityExtraction
+from app.algorithm.extraction.qwen_strategy import QwenEntityExtraction, QwenRelationExtraction
 
+
+class EntityExtractionFactory:
+    """实体抽取算法工厂类"""
+
+    @staticmethod
+    def get_strategy(algorithm: str, api_key: str = None) -> EntityExtractionStrategy:
+        if algorithm == 'crf':
+            return CRFEntityExtraction()
+        elif algorithm == 'qwen':
+            return QwenEntityExtraction(api_key)
+        else:
+            raise ValueError(f"不支持的实体抽取算法: {algorithm}")
+
+
+class RelationExtractionFactory:
+    """关系抽取算法工厂类"""
+
+    @staticmethod
+    def get_strategy(algorithm: str, api_key: str = None) -> RelationExtractionStrategy:
+        if algorithm == 'qwen':
+            return QwenRelationExtraction(api_key)
+        # 可以添加其他关系抽取算法
+        else:
+            raise ValueError(f"不支持的关系抽取算法: {algorithm}")
 logger = logging.getLogger(__name__)
 
 class EntityExtractionFactory:
