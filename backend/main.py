@@ -1,21 +1,20 @@
 import logging
+
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
+
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.utils.exceptions import (
-    APIException,
-    ResourceNotFoundError,
-    PermissionDeniedError,
-    InvalidParameterError,
-    AuthenticationError
+    APIException
 )
 
 # 配置日志
 logging.basicConfig(
-    level=settings.log_level,  # 2. 修复配置参数大小写（LOG_LEVEL -> log_level）
+    level=settings.log_level,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
@@ -27,20 +26,35 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
 # 配置CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,  # 3. 修复配置参数大小写（CORS_ORIGINS -> cors_origins）
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # 挂载静态文件目录
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
 
 # 注册API路由
-app.include_router(api_router, prefix=settings.api_prefix)  # 这里已经是小写，正确
+app.include_router(api_router, prefix=settings.api_prefix)
+
+
+@app.get("/")
+async def read_index():
+    return FileResponse("path/to/your/index.html")
+
+@app.post("/api/v1/user/register")
+async def register_user():
+    # 您的注册逻辑
+    return {"message": "注册成功"}
+
+@app.post("/api/v1/user/login")
+async def login_user():
+    # 您的登录逻辑
+    return {"access_token": "example_token", "token_type": "bearer"}
 
 # 全局异常处理
 @app.exception_handler(APIException)
@@ -52,7 +66,7 @@ async def api_exception_handler(request: Request, exc: APIException):
         content={
             "code": exc.code,
             "message": exc.detail,
-            "data": getattr(exc, 'data', None)  # 使用getattr安全获取data属性
+            "data": getattr(exc, 'data', None)
         }
     )
 

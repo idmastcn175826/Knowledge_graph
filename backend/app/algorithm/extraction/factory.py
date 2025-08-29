@@ -1,17 +1,10 @@
 import logging
+
 from app.algorithm.extraction.base import (
     EntityExtractionStrategy,
-    RelationExtractionStrategy,
-    AttributeExtractionStrategy
+    RelationExtractionStrategy
 )
 from app.algorithm.extraction.bert_strategy import BERTEntityExtraction
-from app.algorithm.extraction.crf_strategy import CRFEntityExtraction
-from app.algorithm.extraction.qwen_strategy import QwenEntityExtraction, QwenRelationExtraction
-from app.algorithm.extraction.base import (
-    EntityExtractionStrategy,
-    RelationExtractionStrategy,
-    AttributeExtractionStrategy
-)
 from app.algorithm.extraction.crf_strategy import CRFEntityExtraction
 from app.algorithm.extraction.qwen_strategy import QwenEntityExtraction, QwenRelationExtraction
 

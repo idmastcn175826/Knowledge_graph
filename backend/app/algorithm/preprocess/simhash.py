@@ -1,7 +1,7 @@
-from .base import PreprocessStrategy
-from typing import List
 import hashlib
-import numpy as np
+from typing import List
+
+from .base import PreprocessStrategy
 
 
 class SimHashPreprocessor(PreprocessStrategy):
