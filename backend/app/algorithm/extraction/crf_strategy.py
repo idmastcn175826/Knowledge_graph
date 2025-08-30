@@ -1,9 +1,9 @@
-import numpy as np
-import sklearn_crfsuite
-from sklearn_crfsuite import metrics
-from typing import List, Dict, Tuple
-import pickle
 import os
+import pickle
+from typing import List, Dict
+
+import sklearn_crfsuite
+
 from app.algorithm.extraction.base import EntityExtractionStrategy
 from app.core.config import settings
 

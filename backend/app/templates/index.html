@@ -1,1319 +1,1354 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>知识图谱构建与问答对话系统</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/vis-network.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识图谱构建与问答对话系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/vis-network.min.js"></script>
+    <!--    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/vis-network.min.js"></script>-->
 
-  <!-- Tailwind配置 -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#165DFF',
-            secondary: '#36CFC9',
-            accent: '#722ED1',
-            success: '#52C41A',
-            warning: '#FAAD14',
-            danger: '#FF4D4F',
-          },
-          fontFamily: {
-            inter: ['Inter', 'system-ui', 'sans-serif'],
-          },
-        },
-      }
-    }
-  </script>
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        accent: '#722ED1',
+                        success: '#52C41A',
+                        warning: '#FAAD14',
+                        danger: '#FF4D4F',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
 
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .nav-item {
-        @apply flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-primary/10;
-      }
-      .nav-item.active {
-        @apply bg-primary/10 text-primary font-medium border-l-4 border-primary;
-      }
-      .card {
-        @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md;
-      }
-      .btn {
-        @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2;
-      }
-      .btn-primary {
-        @apply bg-primary text-white hover:bg-primary/90 active:bg-primary/80;
-      }
-      .btn-outline {
-        @apply border border-gray-200 hover:border-primary hover:text-primary;
-      }
-      .input {
-        @apply w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all;
-      }
-      .badge {
-        @apply px-2 py-1 text-xs rounded-full font-medium;
-      }
-      .form-label {
-        @apply block text-sm font-medium text-gray-700 mb-1;
-      }
-      .progress-bar {
-        @apply h-2 bg-gray-200 rounded-full overflow-hidden;
-      }
-      .progress-fill {
-        @apply h-full bg-primary transition-all duration-500;
-      }
-      .chat-bubble-user {
-        @apply bg-white p-4 rounded-lg rounded-tl-none shadow-sm border border-gray-100 max-w-[80%] self-start;
-      }
-      .chat-bubble-ai {
-        @apply bg-primary/5 p-4 rounded-lg rounded-tr-none shadow-sm border border-primary/10 max-w-[80%] self-end;
-      }
-    }
-  </style>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+
+            .nav-item {
+                @apply flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-primary/10;
+            }
+
+            .nav-item.active {
+                @apply bg-primary/10 text-primary font-medium border-l-4 border-primary;
+            }
+
+            .card {
+                @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md;
+            }
+
+            .btn {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2;
+            }
+
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90 active:bg-primary/80;
+            }
+
+            .btn-outline {
+                @apply border border-gray-200 hover:border-primary hover:text-primary;
+            }
+
+            .input {
+                @apply w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all;
+            }
+
+            .badge {
+                @apply px-2 py-1 text-xs rounded-full font-medium;
+            }
+
+            .form-label {
+                @apply block text-sm font-medium text-gray-700 mb-1;
+            }
+
+            .progress-bar {
+                @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+            }
+
+            .progress-fill {
+                @apply h-full bg-primary transition-all duration-500;
+            }
+
+            .chat-bubble-user {
+                @apply bg-white p-4 rounded-lg rounded-tl-none shadow-sm border border-gray-100 max-w-[80%] self-start;
+            }
+
+            .chat-bubble-ai {
+                @apply bg-primary/5 p-4 rounded-lg rounded-tr-none shadow-sm border border-primary/10 max-w-[80%] self-end;
+            }
+        }
+    </style>
 </head>
 
 <body class="font-inter bg-gray-50 text-gray-800 min-h-screen">
-  <!-- 登录/注册模态框 (默认显示) -->
-  <div id="auth-modal" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+<!-- 登录/注册模态框 (默认显示) -->
+<div id="auth-modal" class="fixed inset-0 bg-white flex items-center justify-center z-50">
     <div class="w-full max-w-md p-6">
-      <div class="text-center mb-8">
-        <div class="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4">
-          <i class="fa fa-sitemap text-3xl"></i>
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <i class="fa fa-sitemap text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold">知识图谱系统</h2>
+            <p class="text-gray-500 mt-2">基于Qwen模型、FastAPI和Neo4j的智能系统</p>
         </div>
-        <h2 class="text-2xl font-bold">知识图谱系统</h2>
-        <p class="text-gray-500 mt-2">基于Qwen模型、FastAPI和Neo4j的智能系统</p>
-      </div>
 
-      <!-- 登录表单 -->
-      <div id="login-form" class="space-y-4">
-        <div id="login-alert" class="hidden p-3 bg-danger/10 text-danger rounded-lg text-sm"></div>
+        <!-- 登录表单 -->
+        <div id="login-form" class="space-y-4">
+            <div id="login-alert" class="hidden p-3 bg-danger/10 text-danger rounded-lg text-sm"></div>
 
-        <div>
-          <label class="form-label">用户名</label>
-          <input type="text" id="login-username" class="input" placeholder="请输入用户名" required>
+            <div>
+                <label class="form-label">用户名</label>
+                <input type="text" id="login-username" class="input" placeholder="请输入用户名" required>
+            </div>
+            <div>
+                <label class="form-label">密码</label>
+                <input type="password" id="login-password" class="input" placeholder="请输入密码" required>
+            </div>
+            <button id="login-btn" class="btn btn-primary w-full">
+                <i class="fa fa-sign-in"></i>
+                <span>登录</span>
+            </button>
+            <div class="text-center text-sm text-gray-500">
+                还没有账号？<a href="javascript:;" id="show-register" class="text-primary hover:underline">立即注册</a>
+            </div>
         </div>
-        <div>
-          <label class="form-label">密码</label>
-          <input type="password" id="login-password" class="input" placeholder="请输入密码" required>
-        </div>
-        <button id="login-btn" class="btn btn-primary w-full">
-          <i class="fa fa-sign-in"></i>
-          <span>登录</span>
-        </button>
-        <div class="text-center text-sm text-gray-500">
-          还没有账号？<a href="javascript:;" id="show-register" class="text-primary hover:underline">立即注册</a>
-        </div>
-      </div>
 
-      <!-- 注册表单 (默认隐藏) -->
-      <div id="register-form" class="space-y-4 hidden">
-        <div id="register-alert" class="hidden p-3 bg-danger/10 text-danger rounded-lg text-sm"></div>
+        <!-- 注册表单 (默认隐藏) -->
+        <div id="register-form" class="space-y-4 hidden">
+            <div id="register-alert" class="hidden p-3 bg-danger/10 text-danger rounded-lg text-sm"></div>
 
-        <div>
-          <label class="form-label">用户名</label>
-          <input type="text" id="register-username" class="input" placeholder="请输入用户名" required>
+            <div>
+                <label class="form-label">用户名</label>
+                <input type="text" id="register-username" class="input" placeholder="请输入用户名" required>
+            </div>
+            <div>
+                <label class="form-label">电子邮箱</label>
+                <input type="email" id="register-email" class="input" placeholder="请输入电子邮箱" required>
+            </div>
+            <div>
+                <label class="form-label">密码</label>
+                <input type="password" id="register-password" class="input" placeholder="请输入密码" required>
+            </div>
+            <div>
+                <label class="form-label">全名 (可选)</label>
+                <input type="text" id="register-fullname" class="input" placeholder="请输入您的全名">
+            </div>
+            <button id="register-btn" class="btn btn-primary w-full">
+                <i class="fa fa-user-plus"></i>
+                <span>注册</span>
+            </button>
+            <div class="text-center text-sm text-gray-500">
+                已有账号？<a href="javascript:;" id="show-login" class="text-primary hover:underline">返回登录</a>
+            </div>
         </div>
-        <div>
-          <label class="form-label">电子邮箱</label>
-          <input type="email" id="register-email" class="input" placeholder="请输入电子邮箱" required>
-        </div>
-        <div>
-          <label class="form-label">密码</label>
-          <input type="password" id="register-password" class="input" placeholder="请输入密码" required>
-        </div>
-        <div>
-          <label class="form-label">全名 (可选)</label>
-          <input type="text" id="register-fullname" class="input" placeholder="请输入您的全名">
-        </div>
-        <button id="register-btn" class="btn btn-primary w-full">
-          <i class="fa fa-user-plus"></i>
-          <span>注册</span>
-        </button>
-        <div class="text-center text-sm text-gray-500">
-          已有账号？<a href="javascript:;" id="show-login" class="text-primary hover:underline">返回登录</a>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- 主应用界面 (默认隐藏) -->
-  <div id="app" class="flex h-screen overflow-hidden hidden">
+<!-- 主应用界面 (默认隐藏) -->
+<div id="app" class="flex h-screen overflow-hidden hidden">
     <!-- 侧边导航 -->
     <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-300">
-      <!-- 品牌标识 -->
-      <div class="p-5 border-b border-gray-200">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            <i class="fa fa-sitemap text-xl"></i>
-          </div>
-          <h1 class="text-xl font-bold">知识图谱系统</h1>
+        <!-- 品牌标识 -->
+        <div class="p-5 border-b border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <i class="fa fa-sitemap text-xl"></i>
+                </div>
+                <h1 class="text-xl font-bold">知识图谱系统</h1>
+            </div>
         </div>
-      </div>
 
-      <!-- 导航菜单 -->
-      <nav class="flex-1 p-3 overflow-y-auto">
-        <ul class="space-y-1">
-          <li>
-            <a href="#dashboard" class="nav-item active" data-view="dashboard-view">
-              <i class="fa fa-dashboard w-5 text-center"></i>
-              <span>仪表盘</span>
-            </a>
-          </li>
-          <li>
-            <a href="#file" class="nav-item" data-view="file-view">
-              <i class="fa fa-file w-5 text-center"></i>
-              <span>文件处理</span>
-            </a>
-          </li>
-          <li>
-            <a href="#knowledge-graph" class="nav-item" data-view="kg-view">
-              <i class="fa fa-project-diagram w-5 text-center"></i>
-              <span>知识图谱</span>
-            </a>
-          </li>
-          <li>
-            <a href="#qa" class="nav-item" data-view="qa-view">
-              <i class="fa fa-comments w-5 text-center"></i>
-              <span>问答对话</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+        <!-- 导航菜单 -->
+        <nav class="flex-1 p-3 overflow-y-auto">
+            <ul class="space-y-1">
+                <li>
+                    <a href="#dashboard" class="nav-item active" data-view="dashboard-view">
+                        <i class="fa fa-dashboard w-5 text-center"></i>
+                        <span>仪表盘</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#file" class="nav-item" data-view="file-view">
+                        <i class="fa fa-file w-5 text-center"></i>
+                        <span>文件处理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#knowledge-graph" class="nav-item" data-view="kg-view">
+                        <i class="fa fa-project-diagram w-5 text-center"></i>
+                        <span>知识图谱</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#qa" class="nav-item" data-view="qa-view">
+                        <i class="fa fa-comments w-5 text-center"></i>
+                        <span>问答对话</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-      <!-- 用户信息 -->
-      <div class="p-4 border-t border-gray-200">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-            <i class="fa fa-user"></i>
-          </div>
-          <div>
-            <p class="font-medium text-sm" id="current-username">testuser</p>
-            <p class="text-xs text-gray-500">普通用户</p>
-          </div>
-          <button id="logout-btn" class="ml-auto text-gray-400 hover:text-danger transition-colors">
-            <i class="fa fa-sign-out"></i>
-          </button>
+        <!-- 用户信息 -->
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-sm" id="current-username">testuser</p>
+                    <p class="text-xs text-gray-500">普通用户</p>
+                </div>
+                <button id="logout-btn" class="ml-auto text-gray-400 hover:text-danger transition-colors">
+                    <i class="fa fa-sign-out"></i>
+                </button>
+            </div>
         </div>
-      </div>
     </aside>
 
     <!-- 主内容区 -->
     <main class="flex-1 flex flex-col overflow-hidden">
-      <!-- 顶部导航 -->
-      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-        <div class="flex items-center gap-4">
-          <button id="mobile-menu-btn" class="lg:hidden text-gray-500 hover:text-primary">
-            <i class="fa fa-bars text-xl"></i>
-          </button>
-          <div class="relative hidden md:block">
-            <input type="text" placeholder="搜索..." class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-64">
-            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-4">
-          <button class="relative p-2 text-gray-500 hover:text-primary rounded-full hover:bg-gray-100">
-            <i class="fa fa-bell text-lg"></i>
-            <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
-          </button>
-          <div class="hidden md:block">
-            <span class="text-sm text-gray-500 mr-2" id="current-time"></span>
-          </div>
-        </div>
-      </header>
-
-      <!-- 内容区域 -->
-      <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
-        <!-- 仪表盘视图 -->
-        <div id="dashboard-view" class="view active">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div>
-              <h2 class="text-2xl font-bold">仪表盘</h2>
-              <p class="text-gray-500">系统概览与数据统计</p>
-            </div>
-            <button class="btn btn-primary" id="create-kg-dashboard-btn">
-              <i class="fa fa-plus"></i>
-              <span>创建知识图谱</span>
-            </button>
-          </div>
-
-          <!-- 统计卡片 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div class="card p-6">
-              <div class="flex justify-between items-start mb-4">
-                <div>
-                  <p class="text-gray-500 text-sm">知识图谱总数</p>
-                  <h3 class="text-3xl font-bold mt-1" id="kg-count">0</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <i class="fa fa-project-diagram text-xl"></i>
-                </div>
-              </div>
-              <div class="flex items-center text-sm">
-                <span class="text-success flex items-center">
-                  <i class="fa fa-arrow-up mr-1"></i> 0%
-                </span>
-                <span class="text-gray-500 ml-2">较上月</span>
-              </div>
-            </div>
-
-            <div class="card p-6">
-              <div class="flex justify-between items-start mb-4">
-                <div>
-                  <p class="text-gray-500 text-sm">上传文件数</p>
-                  <h3 class="text-3xl font-bold mt-1" id="file-count">0</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
-                  <i class="fa fa-file text-xl"></i>
-                </div>
-              </div>
-              <div class="flex items-center text-sm">
-                <span class="text-success flex items-center">
-                  <i class="fa fa-arrow-up mr-1"></i> 0%
-                </span>
-                <span class="text-gray-500 ml-2">较上月</span>
-              </div>
-            </div>
-
-            <div class="card p-6">
-              <div class="flex justify-between items-start mb-4">
-                <div>
-                  <p class="text-gray-500 text-sm">问答次数</p>
-                  <h3 class="text-3xl font-bold mt-1" id="qa-count">0</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
-                  <i class="fa fa-comments text-xl"></i>
-                </div>
-              </div>
-              <div class="flex items-center text-sm">
-                <span class="text-success flex items-center">
-                  <i class="fa fa-arrow-up mr-1"></i> 0%
-                </span>
-                <span class="text-gray-500 ml-2">较上月</span>
-              </div>
-            </div>
-
-            <div class="card p-6">
-              <div class="flex justify-between items-start mb-4">
-                <div>
-                  <p class="text-gray-500 text-sm">实体总数</p>
-                  <h3 class="text-3xl font-bold mt-1" id="entity-count">0</h3>
-                </div>
-                <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
-                  <i class="fa fa-cubes text-xl"></i>
-                </div>
-              </div>
-              <div class="flex items-center text-sm">
-                <span class="text-success flex items-center">
-                  <i class="fa fa-arrow-up mr-1"></i> 0%
-                </span>
-                <span class="text-gray-500 ml-2">较上月</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 最近知识图谱 -->
-          <div class="card p-6 mb-6">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="font-bold text-lg">最近知识图谱</h3>
-              <a href="#knowledge-graph" class="text-primary hover:underline text-sm font-medium nav-link" data-view="kg-view">查看全部</a>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead>
-                  <tr class="text-left text-gray-500 text-sm border-b">
-                    <th class="pb-3 font-medium">名称</th>
-                    <th class="pb-3 font-medium">实体数</th>
-                    <th class="pb-3 font-medium">关系数</th>
-                    <th class="pb-3 font-medium">创建时间</th>
-                    <th class="pb-3 font-medium">状态</th>
-                    <th class="pb-3 font-medium">操作</th>
-                  </tr>
-                </thead>
-                <tbody id="recent-kg-table">
-                  <tr>
-                    <td colspan="6" class="py-8 text-center text-gray-500">
-                      <i class="fa fa-folder-open-o text-3xl mb-2"></i>
-                      <p>暂无知识图谱数据</p>
-                      <p class="text-sm mt-1">点击"创建知识图谱"开始构建您的第一个知识图谱</p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 最近活动 -->
-          <div class="card p-6">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="font-bold text-lg">最近活动</h3>
-            </div>
-            <div id="recent-activities" class="space-y-4">
-              <div class="animate-pulse flex items-start gap-4 pb-4 border-b border-gray-100">
-                <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0"></div>
-                <div class="flex-1">
-                  <div class="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
-                  <div class="h-3 bg-gray-100 rounded w-1/2"></div>
-                </div>
-              </div>
-              <div class="animate-pulse flex items-start gap-4 pb-4 border-b border-gray-100">
-                <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0"></div>
-                <div class="flex-1">
-                  <div class="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
-                  <div class="h-3 bg-gray-100 rounded w-1/2"></div>
-                </div>
-              </div>
-              <div class="animate-pulse flex items-start gap-4">
-                <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0"></div>
-                <div class="flex-1">
-                  <div class="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
-                  <div class="h-3 bg-gray-100 rounded w-1/2"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 文件处理视图 -->
-        <div id="file-view" class="view hidden">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div>
-              <h2 class="text-2xl font-bold">文件处理</h2>
-              <p class="text-gray-500">上传、管理和处理文件</p>
-            </div>
-            <button class="btn btn-primary" id="upload-file-btn">
-              <i class="fa fa-upload"></i>
-              <span>上传文件</span>
-            </button>
-          </div>
-
-          <!-- 文件上传区域 -->
-          <div class="card p-6 mb-6">
-            <div id="file-upload-area" class="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center hover:border-primary/50 transition-colors cursor-pointer">
-              <i class="fa fa-cloud-upload text-4xl text-gray-400 mb-4"></i>
-              <h3 class="text-lg font-medium mb-2">拖放文件到此处上传</h3>
-              <p class="text-gray-500 mb-4">支持 PDF、TXT、DOCX 等格式文件</p>
-              <label class="btn btn-outline inline-flex items-center cursor-pointer">
-                <i class="fa fa-file"></i>
-                <span>选择文件</span>
-                <input type="file" id="file-input" class="hidden" multiple accept=".txt,.pdf,.docx,.doc,.jpg,.png,.mp3,.mp4,.zip">
-              </label>
-            </div>
-
-            <!-- 文件上传进度 (默认隐藏) -->
-            <div id="file-upload-progress" class="hidden mt-6">
-              <div class="flex justify-between items-center mb-2">
-                <span id="uploading-filename" class="text-sm font-medium"></span>
-                <span id="upload-progress-percent" class="text-sm text-primary">0%</span>
-              </div>
-              <div class="progress-bar">
-                <div id="upload-progress-bar" class="progress-fill" style="width: 0%"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 文件列表 -->
-          <div class="card p-6">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="font-bold text-lg">文件列表</h3>
-              <div class="flex gap-2">
-                <div class="relative">
-                  <input type="text" id="file-search" placeholder="搜索文件..." class="pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-48">
-                  <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                </div>
-                <select id="file-filter" class="px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
-                  <option value="all">所有文件</option>
-                  <option value="txt">文本文件</option>
-                  <option value="pdf">PDF文件</option>
-                  <option value="docx">Word文件</option>
-                  <option value="image">图像文件</option>
-                  <option value="audio">音频文件</option>
-                  <option value="video">视频文件</option>
-                  <option value="zip">压缩文件</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead>
-                  <tr class="text-left text-gray-500 text-sm border-b">
-                    <th class="pb-3 font-medium">文件名</th>
-                    <th class="pb-3 font-medium">大小</th>
-                    <th class="pb-3 font-medium">类型</th>
-                    <th class="pb-3 font-medium">上传时间</th>
-                    <th class="pb-3 font-medium">操作</th>
-                  </tr>
-                </thead>
-                <tbody id="file-table">
-                  <tr>
-                    <td colspan="5" class="py-8 text-center text-gray-500">
-                      <i class="fa fa-file-o text-3xl mb-2"></i>
-                      <p>暂无上传的文件</p>
-                      <p class="text-sm mt-1">点击"上传文件"按钮开始上传</p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- 分页控件 -->
-            <div class="flex justify-between items-center mt-6">
-              <div class="text-sm text-gray-500">
-                显示 <span id="file-showing-range">0-0</span> 条，共 <span id="file-total-count">0</span> 条
-              </div>
-              <div class="flex gap-1">
-                <button id="file-prev-page" class="btn btn-outline px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                  <i class="fa fa-chevron-left text-sm"></i>
+        <!-- 顶部导航 -->
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+            <div class="flex items-center gap-4">
+                <button id="mobile-menu-btn" class="lg:hidden text-gray-500 hover:text-primary">
+                    <i class="fa fa-bars text-xl"></i>
                 </button>
-                <button id="file-next-page" class="btn btn-outline px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                  <i class="fa fa-chevron-right text-sm"></i>
+                <div class="relative hidden md:block">
+                    <input type="text" placeholder="搜索..."
+                           class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-64">
+                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button class="relative p-2 text-gray-500 hover:text-primary rounded-full hover:bg-gray-100">
+                    <i class="fa fa-bell text-lg"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
                 </button>
-              </div>
+                <div class="hidden md:block">
+                    <span class="text-sm text-gray-500 mr-2" id="current-time"></span>
+                </div>
             </div>
-          </div>
-        </div>
+        </header>
 
-        <!-- 知识图谱视图 -->
-        <div id="kg-view" class="view hidden">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div>
-              <h2 class="text-2xl font-bold">知识图谱</h2>
-              <p class="text-gray-500">创建、管理和查询知识图谱</p>
-            </div>
-            <button class="btn btn-primary" id="create-kg-btn">
-              <i class="fa fa-plus"></i>
-              <span>创建知识图谱</span>
-            </button>
-          </div>
-
-          <!-- 知识图谱列表 -->
-          <div class="card p-6 mb-6">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="font-bold text-lg">知识图谱列表</h3>
-              <div class="relative">
-                <input type="text" id="kg-search" placeholder="搜索知识图谱..." class="pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-48">
-                <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-              </div>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead>
-                  <tr class="text-left text-gray-500 text-sm border-b">
-                    <th class="pb-3 font-medium">名称</th>
-                    <th class="pb-3 font-medium">实体数</th>
-                    <th class="pb-3 font-medium">关系数</th>
-                    <th class="pb-3 font-medium">创建时间</th>
-                    <th class="pb-3 font-medium">状态</th>
-                    <th class="pb-3 font-medium">操作</th>
-                  </tr>
-                </thead>
-                <tbody id="kg-table">
-                  <tr>
-                    <td colspan="6" class="py-8 text-center text-gray-500">
-                      <i class="fa fa-sitemap text-3xl mb-2"></i>
-                      <p>暂无知识图谱</p>
-                      <p class="text-sm mt-1">点击"创建知识图谱"按钮开始创建</p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 知识图谱详情与可视化 (默认隐藏) -->
-          <div id="kg-detail-section" class="hidden">
-            <div class="card p-6 mb-6">
-              <div class="flex justify-between items-start mb-6">
-                <div>
-                  <h3 class="font-bold text-lg" id="kg-detail-name">知识图谱详情</h3>
-                  <p class="text-gray-500 text-sm" id="kg-detail-meta">创建于 2023-06-15 · 包含 120 个实体 · 230 个关系</p>
-                </div>
-                <div class="flex gap-2">
-                  <button class="btn btn-outline" id="kg-refresh-btn">
-                    <i class="fa fa-refresh"></i>
-                    <span>刷新</span>
-                  </button>
-                  <button class="btn btn-outline" id="kg-delete-btn">
-                    <i class="fa fa-trash"></i>
-                    <span>删除</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- 知识图谱操作 -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="border border-gray-100 rounded-lg p-4">
-                  <h4 class="font-medium mb-2 flex items-center">
-                    <i class="fa fa-search text-primary mr-2"></i>
-                    图谱查询
-                  </h4>
-                  <p class="text-sm text-gray-500 mb-3">查询知识图谱中的实体和关系</p>
-                  <button class="btn btn-outline text-sm w-full" id="kg-query-btn">
-                    <i class="fa fa-search"></i>
-                    <span>查询图谱</span>
-                  </button>
-                </div>
-                <div class="border border-gray-100 rounded-lg p-4">
-                  <h4 class="font-medium mb-2 flex items-center">
-                    <i class="fa fa-comments text-accent mr-2"></i>
-                    问答对话
-                  </h4>
-                  <p class="text-sm text-gray-500 mb-3">基于知识图谱进行智能问答</p>
-                  <button class="btn btn-outline text-sm w-full" id="kg-qa-btn">
-                    <i class="fa fa-comments"></i>
-                    <span>开始对话</span>
-                  </button>
-                </div>
-                <div class="border border-gray-100 rounded-lg p-4">
-                  <h4 class="font-medium mb-2 flex items-center">
-                    <i class="fa fa-download text-secondary mr-2"></i>
-                    导出数据
-                  </h4>
-                  <p class="text-sm text-gray-500 mb-3">导出知识图谱数据用于分析</p>
-                  <button class="btn btn-outline text-sm w-full" id="kg-export-btn">
-                    <i class="fa fa-download"></i>
-                    <span>导出数据</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- 知识图谱可视化 -->
-              <div>
-                <h4 class="font-medium mb-4">知识图谱可视化</h4>
-                <div class="border border-gray-200 rounded-lg h-96 bg-gray-50" id="kg-visualization">
-                  <div class="w-full h-full flex items-center justify-center text-gray-400">
-                    <div class="text-center">
-                      <i class="fa fa-project-diagram text-4xl mb-3"></i>
-                      <p>选择知识图谱查看可视化效果</p>
+        <!-- 内容区域 -->
+        <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <!-- 仪表盘视图 -->
+            <div id="dashboard-view" class="view active">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">仪表盘</h2>
+                        <p class="text-gray-500">系统概览与数据统计</p>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 问答对话视图 -->
-        <div id="qa-view" class="view hidden">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div>
-              <h2 class="text-2xl font-bold">问答对话</h2>
-              <p class="text-gray-500">与知识图谱进行智能对话</p>
-            </div>
-            <div class="flex gap-2">
-              <select id="qa-kg-select" class="px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
-                <option value="">选择知识图谱</option>
-                <!-- 动态填充知识图谱列表 -->
-              </select>
-              <button class="btn btn-outline" id="qa-clear-history">
-                <i class="fa fa-trash"></i>
-                <span>清空历史</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- 问答对话区域 -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- 对话历史 -->
-            <div class="lg:col-span-2">
-              <div class="card h-full flex flex-col">
-                <div class="p-4 border-b border-gray-100">
-                  <h3 class="font-bold">对话历史</h3>
-                </div>
-                <div id="chat-history" class="flex-1 p-4 overflow-y-auto space-y-6">
-                  <div class="text-center text-gray-500 py-10">
-                    <i class="fa fa-comments-o text-4xl mb-3"></i>
-                    <p>请先选择一个知识图谱开始对话</p>
-                  </div>
-                </div>
-                <div class="p-4 border-t border-gray-100">
-                  <div class="flex gap-2">
-                    <input type="text" id="question-input" class="input" placeholder="请输入您的问题..." disabled>
-                    <button id="send-question" class="btn btn-primary" disabled>
-                      <i class="fa fa-paper-plane"></i>
+                    <button class="btn btn-primary" id="create-kg-dashboard-btn">
+                        <i class="fa fa-plus"></i>
+                        <span>创建知识图谱</span>
                     </button>
-                  </div>
                 </div>
-              </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">知识图谱总数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="kg-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-project-diagram text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">上传文件数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="file-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+                                <i class="fa fa-file text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">问答次数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="qa-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                                <i class="fa fa-comments text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">实体总数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="entity-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                                <i class="fa fa-cubes text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最近知识图谱 -->
+                <div class="card p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">最近知识图谱</h3>
+                        <a href="#knowledge-graph" class="text-primary hover:underline text-sm font-medium nav-link"
+                           data-view="kg-view">查看全部</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-3 font-medium">名称</th>
+                                <th class="pb-3 font-medium">实体数</th>
+                                <th class="pb-3 font-medium">关系数</th>
+                                <th class="pb-3 font-medium">创建时间</th>
+                                <th class="pb-3 font-medium">状态</th>
+                                <th class="pb-3 font-medium">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="recent-kg-table">
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-gray-500">
+                                    <i class="fa fa-folder-open-o text-3xl mb-2"></i>
+                                    <p>暂无知识图谱数据</p>
+                                    <p class="text-sm mt-1">点击"创建知识图谱"开始构建您的第一个知识图谱</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 最近活动 -->
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">最近活动</h3>
+                    </div>
+                    <div id="recent-activities" class="space-y-4">
+                        <div class="animate-pulse flex items-start gap-4 pb-4 border-b border-gray-100">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                        <div class="animate-pulse flex items-start gap-4 pb-4 border-b border-gray-100">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                        <div class="animate-pulse flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- 相关实体与关系 -->
-            <div>
-              <div class="card h-full flex flex-col">
-                <div class="p-4 border-b border-gray-100">
-                  <h3 class="font-bold">相关实体与关系</h3>
-                </div>
-                <div class="flex-1 p-4 overflow-y-auto">
-                  <div id="related-entities" class="mb-6">
-                    <h4 class="font-medium text-sm text-gray-500 mb-3">实体</h4>
-                    <div class="space-y-2" id="entities-container">
-                      <p class="text-gray-500 text-sm italic">暂无相关实体</p>
+            <!-- 文件处理视图 -->
+            <div id="file-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">文件处理</h2>
+                        <p class="text-gray-500">上传、管理和处理文件</p>
                     </div>
-                  </div>
-                  <div id="related-relations">
-                    <h4 class="font-medium text-sm text-gray-500 mb-3">关系</h4>
-                    <div class="space-y-2" id="relations-container">
-                      <p class="text-gray-500 text-sm italic">暂无相关关系</p>
-                    </div>
-                  </div>
+                    <button class="btn btn-primary" id="upload-file-btn">
+                        <i class="fa fa-upload"></i>
+                        <span>上传文件</span>
+                    </button>
                 </div>
-              </div>
+
+                <!-- 文件上传区域 -->
+                <div class="card p-6 mb-6">
+                    <div id="file-upload-area"
+                         class="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                        <i class="fa fa-cloud-upload text-4xl text-gray-400 mb-4"></i>
+                        <h3 class="text-lg font-medium mb-2">拖放文件到此处上传</h3>
+                        <p class="text-gray-500 mb-4">支持 PDF、TXT、DOCX 等格式文件</p>
+                        <label class="btn btn-outline inline-flex items-center cursor-pointer">
+                            <i class="fa fa-file"></i>
+                            <span>选择文件</span>
+                            <input type="file" id="file-input" class="hidden" multiple
+                                   accept=".txt,.pdf,.docx,.doc,.jpg,.png,.mp3,.mp4,.zip">
+                        </label>
+                    </div>
+
+                    <!-- 文件上传进度 (默认隐藏) -->
+                    <div id="file-upload-progress" class="hidden mt-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span id="uploading-filename" class="text-sm font-medium"></span>
+                            <span id="upload-progress-percent" class="text-sm text-primary">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="upload-progress-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 文件列表 -->
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">文件列表</h3>
+                        <div class="flex gap-2">
+                            <div class="relative">
+                                <input type="text" id="file-search" placeholder="搜索文件..."
+                                       class="pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-48">
+                                <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                            </div>
+                            <select id="file-filter"
+                                    class="px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                                <option value="all">所有文件</option>
+                                <option value="txt">文本文件</option>
+                                <option value="pdf">PDF文件</option>
+                                <option value="docx">Word文件</option>
+                                <option value="image">图像文件</option>
+                                <option value="audio">音频文件</option>
+                                <option value="video">视频文件</option>
+                                <option value="zip">压缩文件</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-3 font-medium">文件名</th>
+                                <th class="pb-3 font-medium">大小</th>
+                                <th class="pb-3 font-medium">类型</th>
+                                <th class="pb-3 font-medium">上传时间</th>
+                                <th class="pb-3 font-medium">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="file-table">
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-gray-500">
+                                    <i class="fa fa-file-o text-3xl mb-2"></i>
+                                    <p>暂无上传的文件</p>
+                                    <p class="text-sm mt-1">点击"上传文件"按钮开始上传</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分页控件 -->
+                    <div class="flex justify-between items-center mt-6">
+                        <div class="text-sm text-gray-500">
+                            显示 <span id="file-showing-range">0-0</span> 条，共 <span id="file-total-count">0</span> 条
+                        </div>
+                        <div class="flex gap-1">
+                            <button id="file-prev-page"
+                                    class="btn btn-outline px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                <i class="fa fa-chevron-left text-sm"></i>
+                            </button>
+                            <button id="file-next-page"
+                                    class="btn btn-outline px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                <i class="fa fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <!-- 知识图谱视图 -->
+            <div id="kg-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">知识图谱</h2>
+                        <p class="text-gray-500">创建、管理和查询知识图谱</p>
+                    </div>
+                    <button class="btn btn-primary" id="create-kg-btn">
+                        <i class="fa fa-plus"></i>
+                        <span>创建知识图谱</span>
+                    </button>
+                </div>
+
+                <!-- 知识图谱列表 -->
+                <div class="card p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">知识图谱列表</h3>
+                        <div class="relative">
+                            <input type="text" id="kg-search" placeholder="搜索知识图谱..."
+                                   class="pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-48">
+                            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-3 font-medium">名称</th>
+                                <th class="pb-3 font-medium">实体数</th>
+                                <th class="pb-3 font-medium">关系数</th>
+                                <th class="pb-3 font-medium">创建时间</th>
+                                <th class="pb-3 font-medium">状态</th>
+                                <th class="pb-3 font-medium">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="kg-table">
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-gray-500">
+                                    <i class="fa fa-sitemap text-3xl mb-2"></i>
+                                    <p>暂无知识图谱</p>
+                                    <p class="text-sm mt-1">点击"创建知识图谱"按钮开始创建</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 知识图谱详情与可视化 (默认隐藏) -->
+                <div id="kg-detail-section" class="hidden">
+                    <div class="card p-6 mb-6">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 class="font-bold text-lg" id="kg-detail-name">知识图谱详情</h3>
+                                <p class="text-gray-500 text-sm" id="kg-detail-meta">创建于 2023-06-15 · 包含 120 个实体
+                                    · 230 个关系</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn btn-outline" id="kg-refresh-btn">
+                                    <i class="fa fa-refresh"></i>
+                                    <span>刷新</span>
+                                </button>
+                                <button class="btn btn-outline" id="kg-delete-btn">
+                                    <i class="fa fa-trash"></i>
+                                    <span>删除</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 知识图谱操作 -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <h4 class="font-medium mb-2 flex items-center">
+                                    <i class="fa fa-search text-primary mr-2"></i>
+                                    图谱查询
+                                </h4>
+                                <p class="text-sm text-gray-500 mb-3">查询知识图谱中的实体和关系</p>
+                                <button class="btn btn-outline text-sm w-full" id="kg-query-btn">
+                                    <i class="fa fa-search"></i>
+                                    <span>查询图谱</span>
+                                </button>
+                            </div>
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <h4 class="font-medium mb-2 flex items-center">
+                                    <i class="fa fa-comments text-accent mr-2"></i>
+                                    问答对话
+                                </h4>
+                                <p class="text-sm text-gray-500 mb-3">基于知识图谱进行智能问答</p>
+                                <button class="btn btn-outline text-sm w-full" id="kg-qa-btn">
+                                    <i class="fa fa-comments"></i>
+                                    <span>开始对话</span>
+                                </button>
+                            </div>
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <h4 class="font-medium mb-2 flex items-center">
+                                    <i class="fa fa-download text-secondary mr-2"></i>
+                                    导出数据
+                                </h4>
+                                <p class="text-sm text-gray-500 mb-3">导出知识图谱数据用于分析</p>
+                                <button class="btn btn-outline text-sm w-full" id="kg-export-btn">
+                                    <i class="fa fa-download"></i>
+                                    <span>导出数据</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 知识图谱可视化 -->
+                        <div>
+                            <h4 class="font-medium mb-4">知识图谱可视化</h4>
+                            <div class="border border-gray-200 rounded-lg h-96 bg-gray-50" id="kg-visualization">
+                                <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                    <div class="text-center">
+                                        <i class="fa fa-project-diagram text-4xl mb-3"></i>
+                                        <p>选择知识图谱查看可视化效果</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 问答对话视图 -->
+            <div id="qa-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">问答对话</h2>
+                        <p class="text-gray-500">与知识图谱进行智能对话</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="qa-kg-select"
+                                class="px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                            <option value="">选择知识图谱</option>
+                            <!-- 动态填充知识图谱列表 -->
+                        </select>
+                        <button class="btn btn-outline" id="qa-clear-history">
+                            <i class="fa fa-trash"></i>
+                            <span>清空历史</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 问答对话区域 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 对话历史 -->
+                    <div class="lg:col-span-2">
+                        <div class="card h-full flex flex-col">
+                            <div class="p-4 border-b border-gray-100">
+                                <h3 class="font-bold">对话历史</h3>
+                            </div>
+                            <div id="chat-history" class="flex-1 p-4 overflow-y-auto space-y-6">
+                                <div class="text-center text-gray-500 py-10">
+                                    <i class="fa fa-comments-o text-4xl mb-3"></i>
+                                    <p>请先选择一个知识图谱开始对话</p>
+                                </div>
+                            </div>
+                            <div class="p-4 border-t border-gray-100">
+                                <div class="flex gap-2">
+                                    <input type="text" id="question-input" class="input" placeholder="请输入您的问题..."
+                                           disabled>
+                                    <button id="send-question" class="btn btn-primary" disabled>
+                                        <i class="fa fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 相关实体与关系 -->
+                    <div>
+                        <div class="card h-full flex flex-col">
+                            <div class="p-4 border-b border-gray-100">
+                                <h3 class="font-bold">相关实体与关系</h3>
+                            </div>
+                            <div class="flex-1 p-4 overflow-y-auto">
+                                <div id="related-entities" class="mb-6">
+                                    <h4 class="font-medium text-sm text-gray-500 mb-3">实体</h4>
+                                    <div class="space-y-2" id="entities-container">
+                                        <p class="text-gray-500 text-sm italic">暂无相关实体</p>
+                                    </div>
+                                </div>
+                                <div id="related-relations">
+                                    <h4 class="font-medium text-sm text-gray-500 mb-3">关系</h4>
+                                    <div class="space-y-2" id="relations-container">
+                                        <p class="text-gray-500 text-sm italic">暂无相关关系</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </main>
-  </div>
+</div>
 
-  <!-- 创建知识图谱模态框 (默认隐藏) -->
-  <div id="create-kg-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+<!-- 创建知识图谱模态框 (默认隐藏) -->
+<div id="create-kg-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
-      <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-        <h3 class="text-xl font-bold">创建知识图谱</h3>
-        <button id="close-kg-modal" class="text-gray-400 hover:text-gray-600">
-          <i class="fa fa-times"></i>
-        </button>
-      </div>
-      <div class="p-6">
-        <form id="create-kg-form" class="space-y-5">
-          <div>
-            <label class="form-label">知识图谱名称 *</label>
-            <input type="text" id="kg-name" class="input" placeholder="请输入知识图谱名称" required>
-          </div>
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold">创建知识图谱</h3>
+            <button id="close-kg-modal" class="text-gray-400 hover:text-gray-600">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <form id="create-kg-form" class="space-y-5">
+                <div>
+                    <label class="form-label">知识图谱名称 *</label>
+                    <input type="text" id="kg-name" class="input" placeholder="请输入知识图谱名称" required>
+                </div>
 
-          <div>
-            <label class="form-label">选择文件 *</label>
-            <p class="text-sm text-gray-500 mb-2">请选择用于构建知识图谱的文件（可多选）</p>
-            <div class="border border-gray-200 rounded-lg p-4 max-h-40 overflow-y-auto" id="file-selection-container">
-              <p class="text-gray-500 text-sm italic">暂无上传的文件，请先上传文件</p>
-              <!-- 动态填充文件选择框 -->
-            </div>
-          </div>
+                <div>
+                    <label class="form-label">选择文件 *</label>
+                    <p class="text-sm text-gray-500 mb-2">请选择用于构建知识图谱的文件（可多选）</p>
+                    <div class="border border-gray-200 rounded-lg p-4 max-h-40 overflow-y-auto"
+                         id="file-selection-container">
+                        <p class="text-gray-500 text-sm italic">暂无上传的文件，请先上传文件</p>
+                        <!-- 动态填充文件选择框 -->
+                    </div>
+                </div>
 
-          <div>
-            <label class="form-label">算法配置</label>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="form-label text-sm">实体抽取算法</label>
-                <select id="entity-extraction" class="input">
-                  <option value="bert">BERT</option>
-                  <option value="crf">CRF</option>
-                  <option value="qwen" selected>Qwen</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label text-sm">关系抽取算法</label>
-                <select id="relation-extraction" class="input">
-                  <option value="bert">BERT</option>
-                  <option value="qwen" selected>Qwen</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label text-sm">知识补全算法</label>
-                <select id="knowledge-completion" class="input">
-                  <option value="transe" selected>TransE</option>
-                  <option value="distmult">DistMult</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label text-sm">预处理算法</label>
-                <select id="preprocess" class="input">
-                  <option value="simhash" selected>SimHash</option>
-                  <option value="tfidf">TF-IDF</option>
-                </select>
-              </div>
-            </div>
-          </div>
+                <div>
+                    <label class="form-label">算法配置</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label text-sm">实体抽取算法</label>
+                            <select id="entity-extraction" class="input">
+                                <option value="bert">BERT</option>
+                                <option value="crf">CRF</option>
+                                <option value="qwen" selected>Qwen</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label text-sm">关系抽取算法</label>
+                            <select id="relation-extraction" class="input">
+                                <option value="bert">BERT</option>
+                                <option value="qwen" selected>Qwen</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label text-sm">知识补全算法</label>
+                            <select id="knowledge-completion" class="input">
+                                <option value="transe" selected>TransE</option>
+                                <option value="distmult">DistMult</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label text-sm">预处理算法</label>
+                            <select id="preprocess" class="input">
+                                <option value="simhash" selected>SimHash</option>
+                                <option value="tfidf">TF-IDF</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
-          <div>
-            <label class="form-label">高级选项</label>
-            <div class="space-y-3">
-              <div class="flex items-center">
-                <input type="checkbox" id="enable-completion" class="w-4 h-4 text-primary rounded" checked>
-                <label for="enable-completion" class="ml-2 text-sm">启用知识补全</label>
-              </div>
-              <div class="flex items-center">
-                <input type="checkbox" id="enable-visualization" class="w-4 h-4 text-primary rounded" checked>
-                <label for="enable-visualization" class="ml-2 text-sm">启用可视化</label>
-              </div>
-              <div>
-                <label class="form-label text-sm">模型API密钥（可选）</label>
-                <input type="text" id="model-api-key" class="input" placeholder="如果需要使用外部API，请输入密钥">
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="p-6 border-t border-gray-100 flex justify-end gap-3">
-        <button id="cancel-kg-create" class="btn btn-outline">取消</button>
-        <button id="submit-kg-create" class="btn btn-primary">创建知识图谱</button>
-      </div>
+                <div>
+                    <label class="form-label">高级选项</label>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="enable-completion" class="w-4 h-4 text-primary rounded" checked>
+                            <label for="enable-completion" class="ml-2 text-sm">启用知识补全</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="enable-visualization" class="w-4 h-4 text-primary rounded"
+                                   checked>
+                            <label for="enable-visualization" class="ml-2 text-sm">启用可视化</label>
+                        </div>
+                        <div>
+                            <label class="form-label text-sm">模型API密钥（可选）</label>
+                            <input type="text" id="model-api-key" class="input"
+                                   placeholder="如果需要使用外部API，请输入密钥">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="p-6 border-t border-gray-100 flex justify-end gap-3">
+            <button id="cancel-kg-create" class="btn btn-outline">取消</button>
+            <button id="submit-kg-create" class="btn btn-primary">创建知识图谱</button>
+        </div>
     </div>
-  </div>
+</div>
 
-  <!-- 知识图谱查询模态框 (默认隐藏) -->
-  <div id="kg-query-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+<!-- 知识图谱查询模态框 (默认隐藏) -->
+<div id="kg-query-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
-      <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-        <h3 class="text-xl font-bold">知识图谱查询</h3>
-        <button id="close-query-modal" class="text-gray-400 hover:text-gray-600">
-          <i class="fa fa-times"></i>
-        </button>
-      </div>
-      <div class="p-6">
-        <form id="kg-query-form" class="space-y-5">
-          <div>
-            <label class="form-label">查询内容 *</label>
-            <input type="text" id="query-content" class="input" placeholder="请输入查询内容（实体或关系）" required>
-          </div>
-
-          <div>
-            <label class="form-label">查询类型</label>
-            <select id="query-type" class="input">
-              <option value="natural" selected>自然语言查询</option>
-              <option value="cypher">Cypher查询</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="form-label">查询选项</label>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="form-label text-sm">返回结果数量</label>
-                <input type="number" id="query-top-k" class="input" min="1" max="100" value="10">
-              </div>
-              <div class="space-y-2">
-                <div class="flex items-center">
-                  <input type="checkbox" id="include-entities" class="w-4 h-4 text-primary rounded" checked>
-                  <label for="include-entities" class="ml-2 text-sm">包含实体</label>
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold">知识图谱查询</h3>
+            <button id="close-query-modal" class="text-gray-400 hover:text-gray-600">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <form id="kg-query-form" class="space-y-5">
+                <div>
+                    <label class="form-label">查询内容 *</label>
+                    <input type="text" id="query-content" class="input" placeholder="请输入查询内容（实体或关系）"
+                           required>
                 </div>
-                <div class="flex items-center">
-                  <input type="checkbox" id="include-relations" class="w-4 h-4 text-primary rounded" checked>
-                  <label for="include-relations" class="ml-2 text-sm">包含关系</label>
+
+                <div>
+                    <label class="form-label">查询类型</label>
+                    <select id="query-type" class="input">
+                        <option value="natural" selected>自然语言查询</option>
+                        <option value="cypher">Cypher查询</option>
+                    </select>
                 </div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="p-6 border-t border-gray-100 flex justify-end gap-3">
-        <button id="cancel-query" class="btn btn-outline">取消</button>
-        <button id="submit-query" class="btn btn-primary">执行查询</button>
-      </div>
+
+                <div>
+                    <label class="form-label">查询选项</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label text-sm">返回结果数量</label>
+                            <input type="number" id="query-top-k" class="input" min="1" max="100" value="10">
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="include-entities" class="w-4 h-4 text-primary rounded"
+                                       checked>
+                                <label for="include-entities" class="ml-2 text-sm">包含实体</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="include-relations" class="w-4 h-4 text-primary rounded"
+                                       checked>
+                                <label for="include-relations" class="ml-2 text-sm">包含关系</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="p-6 border-t border-gray-100 flex justify-end gap-3">
+            <button id="cancel-query" class="btn btn-outline">取消</button>
+            <button id="submit-query" class="btn btn-primary">执行查询</button>
+        </div>
     </div>
-  </div>
+</div>
 
-  <!-- 查询结果模态框 (默认隐藏) -->
-  <div id="query-result-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+<!-- 查询结果模态框 (默认隐藏) -->
+<div id="query-result-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="w-full max-w-4xl bg-white rounded-xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
-      <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-        <h3 class="text-xl font-bold">查询结果</h3>
-        <button id="close-result-modal" class="text-gray-400 hover:text-gray-600">
-          <i class="fa fa-times"></i>
-        </button>
-      </div>
-      <div class="p-6 flex-1 overflow-y-auto">
-        <div class="mb-6">
-          <h4 class="font-medium text-sm text-gray-500 mb-2">查询内容</h4>
-          <p id="result-query-content" class="bg-gray-50 p-3 rounded-lg"></p>
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold">查询结果</h3>
+            <button id="close-result-modal" class="text-gray-400 hover:text-gray-600">
+                <i class="fa fa-times"></i>
+            </button>
         </div>
+        <div class="p-6 flex-1 overflow-y-auto">
+            <div class="mb-6">
+                <h4 class="font-medium text-sm text-gray-500 mb-2">查询内容</h4>
+                <p id="result-query-content" class="bg-gray-50 p-3 rounded-lg"></p>
+            </div>
 
-        <div class="mb-6">
-          <h4 class="font-medium text-sm text-gray-500 mb-2">回答</h4>
-          <p id="result-answer" class="bg-gray-50 p-3 rounded-lg"></p>
-        </div>
+            <div class="mb-6">
+                <h4 class="font-medium text-sm text-gray-500 mb-2">回答</h4>
+                <p id="result-answer" class="bg-gray-50 p-3 rounded-lg"></p>
+            </div>
 
-        <div class="mb-6">
-          <h4 class="font-medium text-sm text-gray-500 mb-2">实体 (共 <span id="entities-count">0</span> 个)</h4>
-          <div id="result-entities" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            <!-- 动态填充实体 -->
-          </div>
-        </div>
+            <div class="mb-6">
+                <h4 class="font-medium text-sm text-gray-500 mb-2">实体 (共 <span id="entities-count">0</span> 个)</h4>
+                <div id="result-entities" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <!-- 动态填充实体 -->
+                </div>
+            </div>
 
-        <div>
-          <h4 class="font-medium text-sm text-gray-500 mb-2">关系 (共 <span id="relations-count">0</span> 个)</h4>
-          <div id="result-relations" class="space-y-3">
-            <!-- 动态填充关系 -->
-          </div>
+            <div>
+                <h4 class="font-medium text-sm text-gray-500 mb-2">关系 (共 <span id="relations-count">0</span> 个)</h4>
+                <div id="result-relations" class="space-y-3">
+                    <!-- 动态填充关系 -->
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="p-6 border-t border-gray-100 flex justify-end">
-        <button id="close-result" class="btn btn-primary">关闭</button>
-      </div>
+        <div class="p-6 border-t border-gray-100 flex justify-end">
+            <button id="close-result" class="btn btn-primary">关闭</button>
+        </div>
     </div>
-  </div>
+</div>
 
-  <!-- 进度提示模态框 (默认隐藏) -->
-  <div id="progress-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+<!-- 进度提示模态框 (默认隐藏) -->
+<div id="progress-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
-      <div class="p-6 text-center">
-        <div class="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
-          <i class="fa fa-spinner fa-spin text-2xl"></i>
-        </div>
-        <h3 class="text-xl font-bold mb-2" id="progress-title">处理中</h3>
-        <p class="text-gray-500 mb-6" id="progress-message">正在处理您的请求，请稍候...</p>
+        <div class="p-6 text-center">
+            <div class="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <i class="fa fa-spinner fa-spin text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2" id="progress-title">处理中</h3>
+            <p class="text-gray-500 mb-6" id="progress-message">正在处理您的请求，请稍候...</p>
 
-        <div class="mb-2 flex justify-between items-center">
-          <span class="text-sm font-medium" id="progress-stage">准备中</span>
-          <span class="text-sm text-primary" id="progress-percent">0%</span>
+            <div class="mb-2 flex justify-between items-center">
+                <span class="text-sm font-medium" id="progress-stage">准备中</span>
+                <span class="text-sm text-primary" id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+            </div>
         </div>
-        <div class="progress-bar">
-          <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- 确认删除模态框 (默认隐藏) -->
-  <div id="confirm-delete-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+<!-- 确认删除模态框 (默认隐藏) -->
+<div id="confirm-delete-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
-      <div class="p-6">
-        <div class="text-center mb-6">
-          <div class="w-16 h-16 mx-auto rounded-full bg-danger/10 flex items-center justify-center text-danger mb-4">
-            <i class="fa fa-exclamation-triangle text-2xl"></i>
-          </div>
-          <h3 class="text-xl font-bold mb-2">确认删除</h3>
-          <p class="text-gray-500" id="delete-confirmation-message">您确定要删除这个项目吗？此操作无法撤销。</p>
-        </div>
+        <div class="p-6">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto rounded-full bg-danger/10 flex items-center justify-center text-danger mb-4">
+                    <i class="fa fa-exclamation-triangle text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">确认删除</h3>
+                <p class="text-gray-500" id="delete-confirmation-message">您确定要删除这个项目吗？此操作无法撤销。</p>
+            </div>
 
-        <div class="flex gap-3">
-          <button id="cancel-delete" class="btn btn-outline flex-1">取消</button>
-          <button id="confirm-delete" class="btn btn-primary bg-danger hover:bg-danger/90 flex-1">确认删除</button>
+            <div class="flex gap-3">
+                <button id="cancel-delete" class="btn btn-outline flex-1">取消</button>
+                <button id="confirm-delete" class="btn btn-primary bg-danger hover:bg-danger/90 flex-1">确认删除
+                </button>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
     // 后端API基础地址
     const API_BASE_URL = 'http://localhost:8000';
 
     // 全局状态
     let state = {
-      token: localStorage.getItem('token') || null,
-      currentUser: null,
-      currentKGId: null,
-      currentSessionId: null,
-      files: [],
-      knowledgeGraphs: [],
-      currentPage: 1,
-      pageSize: 20
+        token: localStorage.getItem('token') || null,
+        currentUser: null,
+        currentKGId: null,
+        currentSessionId: null,
+        files: [],
+        knowledgeGraphs: [],
+        currentPage: 1,
+        pageSize: 20
     };
 
     // DOM加载完成后初始化
     document.addEventListener('DOMContentLoaded', () => {
-      // 检查是否已登录
-      if (state.token) {
-        fetchCurrentUser();
-      } else {
-        // 显示登录模态框
-        document.getElementById('auth-modal').classList.remove('hidden');
-      }
+        // 检查是否已登录
+        if (state.token) {
+            fetchCurrentUser();
+        } else {
+            // 显示登录模态框
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
 
-      // 初始化事件监听
-      initEventListeners();
+        // 初始化事件监听
+        initEventListeners();
 
-      // 更新当前时间
-      updateCurrentTime();
-      setInterval(updateCurrentTime, 60000);
+        // 更新当前时间
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 60000);
     });
 
     // 初始化事件监听
     function initEventListeners() {
-      // 登录注册相关
-      document.getElementById('show-register').addEventListener('click', () => {
-        document.getElementById('login-form').classList.add('hidden');
-        document.getElementById('register-form').classList.remove('hidden');
-      });
-
-      document.getElementById('show-login').addEventListener('click', () => {
-        document.getElementById('register-form').classList.add('hidden');
-        document.getElementById('login-form').classList.remove('hidden');
-      });
-
-      document.getElementById('register-btn').addEventListener('click', handleRegister);
-      document.getElementById('login-btn').addEventListener('click', handleLogin);
-      document.getElementById('logout-btn').addEventListener('click', handleLogout);
-
-      // 导航相关
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.preventDefault();
-          const view = item.getAttribute('data-view');
-          switchView(view);
-
-          // 更新活跃导航项
-          document.querySelectorAll('.nav-item').forEach(navItem => {
-            navItem.classList.remove('active');
-          });
-          item.classList.add('active');
+        // 登录注册相关
+        document.getElementById('show-register').addEventListener('click', () => {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
         });
-      });
 
-      // 移动端菜单
-      document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('-translate-x-full');
-      });
+        document.getElementById('show-login').addEventListener('click', () => {
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        });
 
-      // 文件上传相关
-      document.getElementById('upload-file-btn').addEventListener('click', () => {
-        document.getElementById('file-input').click();
-      });
+        document.getElementById('register-btn').addEventListener('click', handleRegister);
+        document.getElementById('login-btn').addEventListener('click', handleLogin);
+        document.getElementById('logout-btn').addEventListener('click', handleLogout);
 
-      document.getElementById('file-upload-area').addEventListener('click', () => {
-        document.getElementById('file-input').click();
-      });
+        // 导航相关
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const view = item.getAttribute('data-view');
+                switchView(view);
 
-      document.getElementById('file-input').addEventListener('change', handleFileSelection);
+                // 更新活跃导航项
+                document.querySelectorAll('.nav-item').forEach(navItem => {
+                    navItem.classList.remove('active');
+                });
+                item.classList.add('active');
+            });
+        });
 
-      // 文件拖放
-      const fileUploadArea = document.getElementById('file-upload-area');
-      fileUploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.add('border-primary');
-      });
+        // 移动端菜单
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        });
 
-      fileUploadArea.addEventListener('dragleave', () => {
-        fileUploadArea.classList.remove('border-primary');
-      });
+        // 文件上传相关
+        document.getElementById('upload-file-btn').addEventListener('click', () => {
+            document.getElementById('file-input').click();
+        });
 
-      fileUploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.remove('border-primary');
+        document.getElementById('file-upload-area').addEventListener('click', () => {
+            document.getElementById('file-input').click();
+        });
 
-        if (e.dataTransfer.files.length) {
-          uploadFiles(e.dataTransfer.files);
-        }
-      });
+        document.getElementById('file-input').addEventListener('change', handleFileSelection);
 
-      // 知识图谱相关
-      document.getElementById('create-kg-btn').addEventListener('click', showCreateKGModal);
-      document.getElementById('create-kg-dashboard-btn').addEventListener('click', showCreateKGModal);
-      document.getElementById('close-kg-modal').addEventListener('click', hideCreateKGModal);
-      document.getElementById('cancel-kg-create').addEventListener('click', hideCreateKGModal);
-      document.getElementById('submit-kg-create').addEventListener('click', handleCreateKG);
+        // 文件拖放
+        const fileUploadArea = document.getElementById('file-upload-area');
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('border-primary');
+        });
 
-      // 知识图谱查询相关
-      document.getElementById('kg-query-btn').addEventListener('click', showKGQueryModal);
-      document.getElementById('close-query-modal').addEventListener('click', hideKGQueryModal);
-      document.getElementById('cancel-query').addEventListener('click', hideKGQueryModal);
-      document.getElementById('submit-query').addEventListener('click', handleKGQuery);
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('border-primary');
+        });
 
-      // 查询结果相关
-      document.getElementById('close-result-modal').addEventListener('click', hideQueryResultModal);
-      document.getElementById('close-result').addEventListener('click', hideQueryResultModal);
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('border-primary');
 
-      // 问答相关
-      document.getElementById('send-question').addEventListener('click', sendQuestion);
-      document.getElementById('question-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          sendQuestion();
-        }
-      });
+            if (e.dataTransfer.files.length) {
+                uploadFiles(e.dataTransfer.files);
+            }
+        });
 
-      document.getElementById('qa-kg-select').addEventListener('change', handleKGSelectForQA);
-      document.getElementById('qa-clear-history').addEventListener('click', clearQAHistory);
+        // 知识图谱相关
+        document.getElementById('create-kg-btn').addEventListener('click', showCreateKGModal);
+        document.getElementById('create-kg-dashboard-btn').addEventListener('click', showCreateKGModal);
+        document.getElementById('close-kg-modal').addEventListener('click', hideCreateKGModal);
+        document.getElementById('cancel-kg-create').addEventListener('click', hideCreateKGModal);
+        document.getElementById('submit-kg-create').addEventListener('click', handleCreateKG);
 
-      // 删除确认相关
-      document.getElementById('cancel-delete').addEventListener('click', hideConfirmDeleteModal);
+        // 知识图谱查询相关
+        document.getElementById('kg-query-btn').addEventListener('click', showKGQueryModal);
+        document.getElementById('close-query-modal').addEventListener('click', hideKGQueryModal);
+        document.getElementById('cancel-query').addEventListener('click', hideKGQueryModal);
+        document.getElementById('submit-query').addEventListener('click', handleKGQuery);
+
+        // 查询结果相关
+        document.getElementById('close-result-modal').addEventListener('click', hideQueryResultModal);
+        document.getElementById('close-result').addEventListener('click', hideQueryResultModal);
+
+        // 问答相关
+        document.getElementById('send-question').addEventListener('click', sendQuestion);
+        document.getElementById('question-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendQuestion();
+            }
+        });
+
+        document.getElementById('qa-kg-select').addEventListener('change', handleKGSelectForQA);
+        document.getElementById('qa-clear-history').addEventListener('click', clearQAHistory);
+
+        // 删除确认相关
+        document.getElementById('cancel-delete').addEventListener('click', hideConfirmDeleteModal);
     }
 
     // 切换视图
     function switchView(viewId) {
-      // 隐藏所有视图
-      document.querySelectorAll('.view').forEach(view => {
-        view.classList.add('hidden');
-      });
+        // 隐藏所有视图
+        document.querySelectorAll('.view').forEach(view => {
+            view.classList.add('hidden');
+        });
 
-      // 显示目标视图
-      document.getElementById(viewId).classList.remove('hidden');
+        // 显示目标视图
+        document.getElementById(viewId).classList.remove('hidden');
 
-      // 根据视图加载数据
-      if (viewId === 'file-view') {
-        fetchFiles();
-      } else if (viewId === 'kg-view') {
-        fetchKnowledgeGraphs();
-      } else if (viewId === 'qa-view') {
-        populateKGSelectForQA();
-        fetchQAHistory();
-      } else if (viewId === 'dashboard-view') {
-        fetchDashboardStats();
-      }
+        // 根据视图加载数据
+        if (viewId === 'file-view') {
+            fetchFiles();
+        } else if (viewId === 'kg-view') {
+            fetchKnowledgeGraphs();
+        } else if (viewId === 'qa-view') {
+            populateKGSelectForQA();
+            fetchQAHistory();
+        } else if (viewId === 'dashboard-view') {
+            fetchDashboardStats();
+        }
     }
 
     // 更新当前时间
     function updateCurrentTime() {
-      const now = new Date();
-      document.getElementById('current-time').textContent = now.toLocaleString();
+        const now = new Date();
+        document.getElementById('current-time').textContent = now.toLocaleString();
     }
 
     // 处理注册
     async function handleRegister() {
-      const username = document.getElementById('register-username').value;
-      const email = document.getElementById('register-email').value;
-      const password = document.getElementById('register-password').value;
-      const fullName = document.getElementById('register-fullname').value;
+        const username = document.getElementById('register-username').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        const fullName = document.getElementById('register-fullname').value;
 
-      // 简单验证
-      if (!username || !email || !password) {
-        showRegisterError('请填写必填字段');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/user/register`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            username,
-            email,
-            password,
-            full_name: fullName
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          showRegisterError(error.detail || '注册失败，请稍后重试');
-          return;
+        // 简单验证
+        if (!username || !email || !password) {
+            showRegisterError('请填写必填字段');
+            return;
         }
 
-        // 注册成功，切换到登录表单
-        document.getElementById('register-form').classList.add('hidden');
-        document.getElementById('login-form').classList.remove('hidden');
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/user/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username,
+                    email,
+                    password,
+                    full_name: fullName
+                })
+            });
 
-        // 显示成功消息
-        alert('注册成功，请登录');
-      } catch (error) {
-        showRegisterError('网络错误，请稍后重试');
-        console.error('注册失败:', error);
-      }
+            if (!response.ok) {
+                const error = await response.json();
+                showRegisterError(error.detail || '注册失败，请稍后重试');
+                return;
+            }
+
+            // 注册成功，切换到登录表单
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+
+            // 显示成功消息
+            alert('注册成功，请登录');
+        } catch (error) {
+            showRegisterError('网络错误，请稍后重试');
+            console.error('注册失败:', error);
+        }
     }
 
     // 处理登录
     async function handleLogin() {
-      const username = document.getElementById('login-username').value;
-      const password = document.getElementById('login-password').value;
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
 
-      // 简单验证
-      if (!username || !password) {
-        showLoginError('请填写用户名和密码');
-        return;
-      }
-
-      try {
-        // 创建表单数据
-        const formData = new FormData();
-        formData.append('grant_type', 'password');
-        formData.append('username', username);
-        formData.append('password', password);
-
-        const response = await fetch(`${API_BASE_URL}/api/v1/user/login`, {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          showLoginError(error.detail || '登录失败，请检查用户名和密码');
-          return;
+        // 简单验证
+        if (!username || !password) {
+            showLoginError('请填写用户名和密码');
+            return;
         }
 
-        const data = await response.json();
+        try {
+            // 创建表单数据
+            const formData = new FormData();
+            formData.append('grant_type', 'password');
+            formData.append('username', username);
+            formData.append('password', password);
 
-        // 保存令牌
-        state.token = data.access_token;
-        localStorage.setItem('token', data.access_token);
+            const response = await fetch(`${API_BASE_URL}/api/v1/user/login`, {
+                method: 'POST',
+                body: formData
+            });
 
-        // 获取当前用户信息
-        fetchCurrentUser();
-      } catch (error) {
-        showLoginError('网络错误，请稍后重试');
-        console.error('登录失败:', error);
-      }
+            if (!response.ok) {
+                const error = await response.json();
+                showLoginError(error.detail || '登录失败，请检查用户名和密码');
+                return;
+            }
+
+            const data = await response.json();
+
+            // 保存令牌
+            state.token = data.access_token;
+            localStorage.setItem('token', data.access_token);
+
+            // 获取当前用户信息
+            fetchCurrentUser();
+        } catch (error) {
+            showLoginError('网络错误，请稍后重试');
+            console.error('登录失败:', error);
+        }
     }
 
     // 处理登出
     function handleLogout() {
-      // 清除令牌和用户信息
-      state.token = null;
-      state.currentUser = null;
-      localStorage.removeItem('token');
+        // 清除令牌和用户信息
+        state.token = null;
+        state.currentUser = null;
+        localStorage.removeItem('token');
 
-      // 显示登录模态框，隐藏应用
-      document.getElementById('auth-modal').classList.remove('hidden');
-      document.getElementById('app').classList.add('hidden');
+        // 显示登录模态框，隐藏应用
+        document.getElementById('auth-modal').classList.remove('hidden');
+        document.getElementById('app').classList.add('hidden');
     }
 
     // 获取当前用户信息
     async function fetchCurrentUser() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/user/me`, {
-          headers: {
-            'Authorization': `Bearer ${state.token}`
-          }
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/user/me`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
 
-        if (!response.ok) {
-          // 令牌无效或过期，需要重新登录
-          handleLogout();
-          return;
+            if (!response.ok) {
+                // 令牌无效或过期，需要重新登录
+                handleLogout();
+                return;
+            }
+
+            const user = await response.json();
+            state.currentUser = user;
+
+            // 更新UI
+            document.getElementById('current-username').textContent = user.username;
+
+            // 隐藏登录模态框，显示应用
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+
+            // 加载初始数据
+            fetchDashboardStats();
+            fetchFiles();
+            fetchKnowledgeGraphs();
+        } catch (error) {
+            console.error('获取用户信息失败:', error);
+            handleLogout();
         }
-
-        const user = await response.json();
-        state.currentUser = user;
-
-        // 更新UI
-        document.getElementById('current-username').textContent = user.username;
-
-        // 隐藏登录模态框，显示应用
-        document.getElementById('auth-modal').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden');
-
-        // 加载初始数据
-        fetchDashboardStats();
-        fetchFiles();
-        fetchKnowledgeGraphs();
-      } catch (error) {
-        console.error('获取用户信息失败:', error);
-        handleLogout();
-      }
     }
 
     // 显示登录错误
     function showLoginError(message) {
-      const alert = document.getElementById('login-alert');
-      alert.textContent = message;
-      alert.classList.remove('hidden');
+        const alert = document.getElementById('login-alert');
+        alert.textContent = message;
+        alert.classList.remove('hidden');
 
-      // 3秒后自动隐藏
-      setTimeout(() => {
-        alert.classList.add('hidden');
-      }, 3000);
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            alert.classList.add('hidden');
+        }, 3000);
     }
 
     // 显示注册错误
     function showRegisterError(message) {
-      const alert = document.getElementById('register-alert');
-      alert.textContent = message;
-      alert.classList.remove('hidden');
+        const alert = document.getElementById('register-alert');
+        alert.textContent = message;
+        alert.classList.remove('hidden');
 
-      // 3秒后自动隐藏
-      setTimeout(() => {
-        alert.classList.add('hidden');
-      }, 3000);
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            alert.classList.add('hidden');
+        }, 3000);
     }
 
     // 处理文件选择
     function handleFileSelection(e) {
-      if (e.target.files.length) {
-        uploadFiles(e.target.files);
-        // 重置输入，允许重复选择同一文件
-        e.target.value = '';
-      }
+        if (e.target.files.length) {
+            uploadFiles(e.target.files);
+            // 重置输入，允许重复选择同一文件
+            e.target.value = '';
+        }
     }
 
     // 上传文件
     async function uploadFiles(files) {
-      if (!files.length) return;
+        if (!files.length) return;
 
-      // 显示上传进度
-      const progressContainer = document.getElementById('file-upload-progress');
-      const progressBar = document.getElementById('upload-progress-bar');
-      const progressPercent = document.getElementById('upload-progress-percent');
-      const fileNameElement = document.getElementById('uploading-filename');
+        // 显示上传进度
+        const progressContainer = document.getElementById('file-upload-progress');
+        const progressBar = document.getElementById('upload-progress-bar');
+        const progressPercent = document.getElementById('upload-progress-percent');
+        const fileNameElement = document.getElementById('uploading-filename');
 
-      progressContainer.classList.remove('hidden');
+        progressContainer.classList.remove('hidden');
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        fileNameElement.textContent = file.name;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            fileNameElement.textContent = file.name;
 
-        const formData = new FormData();
-        formData.append('file', file);
+            const formData = new FormData();
+            formData.append('file', file);
 
-        try {
-          const response = await fetch(`${API_BASE_URL}/api/v1/file/upload`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${state.token}`
-            },
-            body: formData
-          });
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/file/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${state.token}`
+                    },
+                    body: formData
+                });
 
-          if (!response.ok) {
-            throw new Error('文件上传失败');
-          }
+                if (!response.ok) {
+                    throw new Error('文件上传失败');
+                }
 
-          // 更新进度
-          const progress = Math.round(((i + 1) / files.length) * 100);
-          progressBar.style.width = `${progress}%`;
-          progressPercent.textContent = `${progress}%`;
+                // 更新进度
+                const progress = Math.round(((i + 1) / files.length) * 100);
+                progressBar.style.width = `${progress}%`;
+                progressPercent.textContent = `${progress}%`;
 
-          // 重新加载文件列表
-          fetchFiles();
-        } catch (error) {
-          console.error('文件上传失败:', error);
-          alert(`文件 ${file.name} 上传失败: ${error.message}`);
+                // 重新加载文件列表
+                fetchFiles();
+            } catch (error) {
+                console.error('文件上传失败:', error);
+                alert(`文件 ${file.name} 上传失败: ${error.message}`);
+            }
         }
-      }
 
-      // 上传完成后隐藏进度条
-      setTimeout(() => {
-        progressContainer.classList.add('hidden');
-        progressBar.style.width = '0%';
-        progressPercent.textContent = '0%';
-      }, 1000);
+        // 上传完成后隐藏进度条
+        setTimeout(() => {
+            progressContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+        }, 1000);
     }
 
     // 获取文件列表
     async function fetchFiles(page = 1, pageSize = 20) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/file/list?page=${page}&page_size=${pageSize}`, {
-          headers: {
-            'Authorization': `Bearer ${state.token}`
-          }
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/file/list?page=${page}&page_size=${pageSize}`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
 
-        if (!response.ok) {
-          throw new Error('获取文件列表失败');
+            if (!response.ok) {
+                throw new Error('获取文件列表失败');
+            }
+
+            const files = await response.json();
+            state.files = files;
+            state.currentPage = page;
+            state.pageSize = pageSize;
+
+            // 更新文件表格
+            renderFileTable();
+
+            // 更新分页信息
+            updateFilePagination();
+
+            // 更新创建知识图谱模态框中的文件选择
+            populateFileSelection();
+        } catch (error) {
+            console.error('获取文件列表失败:', error);
         }
-
-        const files = await response.json();
-        state.files = files;
-        state.currentPage = page;
-        state.pageSize = pageSize;
-
-        // 更新文件表格
-        renderFileTable();
-
-        // 更新分页信息
-        updateFilePagination();
-
-        // 更新创建知识图谱模态框中的文件选择
-        populateFileSelection();
-      } catch (error) {
-        console.error('获取文件列表失败:', error);
-      }
     }
 
     // 渲染文件表格
     function renderFileTable() {
-      const tableBody = document.getElementById('file-table');
+        const tableBody = document.getElementById('file-table');
 
-      if (state.files.length === 0) {
-        tableBody.innerHTML = `
+        if (state.files.length === 0) {
+            tableBody.innerHTML = `
           <tr>
             <td colspan="5" class="py-8 text-center text-gray-500">
               <i class="fa fa-file-o text-3xl mb-2"></i>
@@ -1322,15 +1357,15 @@
             </td>
           </tr>
         `;
-        return;
-      }
+            return;
+        }
 
-      let html = '';
-      state.files.forEach(file => {
-        // 格式化文件大小
-        const fileSize = formatFileSize(file.file_size);
+        let html = '';
+        state.files.forEach(file => {
+            // 格式化文件大小
+            const fileSize = formatFileSize(file.file_size);
 
-        html += `
+            html += `
           <tr class="border-b border-gray-100 hover:bg-gray-50">
             <td class="py-4">
               <div class="flex items-center gap-3">
@@ -1355,622 +1390,658 @@
             </td>
           </tr>
         `;
-      });
+        });
 
-      tableBody.innerHTML = html;
+        tableBody.innerHTML = html;
     }
 
     // 更新文件分页
     function updateFilePagination() {
-      const totalCount = state.files.length;
-      const currentPage = state.currentPage;
-      const pageSize = state.pageSize;
+        const totalCount = state.files.length;
+        const currentPage = state.currentPage;
+        const pageSize = state.pageSize;
 
-      // 更新显示范围
-      const start = (currentPage - 1) * pageSize + 1;
-      const end = Math.min(currentPage * pageSize, totalCount);
-      document.getElementById('file-showing-range').textContent = `${start}-${end}`;
-      document.getElementById('file-total-count').textContent = totalCount;
+        // 更新显示范围
+        const start = (currentPage - 1) * pageSize + 1;
+        const end = Math.min(currentPage * pageSize, totalCount);
+        document.getElementById('file-showing-range').textContent = `${start}-${end}`;
+        document.getElementById('file-total-count').textContent = totalCount;
 
-      // 更新分页按钮状态
-      const prevBtn = document.getElementById('file-prev-page');
-      const nextBtn = document.getElementById('file-next-page');
+        // 更新分页按钮状态
+        const prevBtn = document.getElementById('file-prev-page');
+        const nextBtn = document.getElementById('file-next-page');
 
-      prevBtn.disabled = currentPage === 1;
-      nextBtn.disabled = end >= totalCount;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = end >= totalCount;
 
-      // 添加分页事件
-      prevBtn.onclick = () => {
-        if (currentPage > 1) {
-          fetchFiles(currentPage - 1, pageSize);
-        }
-      };
+        // 添加分页事件
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                fetchFiles(currentPage - 1, pageSize);
+            }
+        };
 
-      nextBtn.onclick = () => {
-        if (end < totalCount) {
-          fetchFiles(currentPage + 1, pageSize);
-        }
-      };
+        nextBtn.onclick = () => {
+            if (end < totalCount) {
+                fetchFiles(currentPage + 1, pageSize);
+            }
+        };
     }
 
     // 下载文件
     async function downloadFile(fileId) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/file/${fileId}/download`, {
-          headers: {
-            'Authorization': `Bearer ${state.token}`
-          }
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/file/${fileId}/download`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
 
-        if (!response.ok) {
-          throw new Error('文件下载失败');
+            if (!response.ok) {
+                throw new Error('文件下载失败');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            // 获取文件名
+            const file = state.files.find(f => f.file_id === fileId);
+            const fileName = file ? file.file_name : 'downloaded-file';
+
+            // 创建下载链接
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+
+            // 清理
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('文件下载失败:', error);
+            alert('文件下载失败: ' + error.message);
         }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-
-        // 获取文件名
-        const file = state.files.find(f => f.file_id === fileId);
-        const fileName = file ? file.file_name : 'downloaded-file';
-
-        // 创建下载链接
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-
-        // 清理
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } catch (error) {
-        console.error('文件下载失败:', error);
-        alert('文件下载失败: ' + error.message);
-      }
     }
 
     // 显示删除文件确认
     function showDeleteFileConfirm(fileId, fileName) {
-      const messageElement = document.getElementById('delete-confirmation-message');
-      messageElement.textContent = `您确定要删除文件 "${fileName}" 吗？此操作无法撤销。`;
+        const messageElement = document.getElementById('delete-confirmation-message');
+        messageElement.textContent = `您确定要删除文件 "${fileName}" 吗？此操作无法撤销。`;
 
-      // 设置确认删除回调
-      document.getElementById('confirm-delete').onclick = () => {
-        deleteFile(fileId);
-      };
+        // 设置确认删除回调
+        document.getElementById('confirm-delete').onclick = () => {
+            deleteFile(fileId);
+        };
 
-      // 显示确认模态框
-      document.getElementById('confirm-delete-modal').classList.remove('hidden');
+        // 显示确认模态框
+        document.getElementById('confirm-delete-modal').classList.remove('hidden');
     }
 
     // 删除文件
     async function deleteFile(fileId) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/file/${fileId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${state.token}`
-          }
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/file/${fileId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
 
-        if (!response.ok) {
-          throw new Error('文件删除失败');
+            if (!response.ok) {
+                throw new Error('文件删除失败');
+            }
+
+            // 重新加载文件列表
+            fetchFiles();
+
+            // 隐藏确认模态框
+            hideConfirmDeleteModal();
+        } catch (error) {
+            console.error('文件删除失败:', error);
+            alert('文件删除失败: ' + error.message);
         }
-
-        // 重新加载文件列表
-        fetchFiles();
-
-        // 隐藏确认模态框
-        hideConfirmDeleteModal();
-      } catch (error) {
-        console.error('文件删除失败:', error);
-        alert('文件删除失败: ' + error.message);
-      }
     }
 
     // 显示创建知识图谱模态框
     function showCreateKGModal() {
-      document.getElementById('create-kg-modal').classList.remove('hidden');
-      populateFileSelection();
+        document.getElementById('create-kg-modal').classList.remove('hidden');
+        populateFileSelection();
     }
 
     // 隐藏创建知识图谱模态框
     function hideCreateKGModal() {
-      document.getElementById('create-kg-modal').classList.add('hidden');
+        document.getElementById('create-kg-modal').classList.add('hidden');
     }
 
     // 填充文件选择框
     function populateFileSelection() {
-      const container = document.getElementById('file-selection-container');
+        const container = document.getElementById('file-selection-container');
 
-      if (state.files.length === 0) {
-        container.innerHTML = `
+        if (state.files.length === 0) {
+            container.innerHTML = `
           <p class="text-gray-500 text-sm italic">暂无上传的文件，请先上传文件</p>
         `;
-        return;
-      }
+            return;
+        }
 
-      let html = '';
-      state.files.forEach(file => {
-        html += `
+        let html = '';
+        state.files.forEach(file => {
+            html += `
           <div class="flex items-center">
             <input type="checkbox" id="file-${file.file_id}" value="${file.file_id}" class="w-4 h-4 text-primary rounded">
             <label for="file-${file.file_id}" class="ml-2 text-sm">${file.file_name}</label>
           </div>
         `;
-      });
+        });
 
-      container.innerHTML = html;
+        container.innerHTML = html;
     }
 
     // 处理创建知识图谱
     async function handleCreateKG() {
-      const kgName = document.getElementById('kg-name').value;
+        const kgName = document.getElementById('kg-name').value;
 
-      // 获取选中的文件ID
-      const selectedFiles = [];
-      document.querySelectorAll('#file-selection-container input[type="checkbox"]:checked').forEach(checkbox => {
-        selectedFiles.push(checkbox.value);
-      });
-
-      // 简单验证
-      if (!kgName) {
-        alert('请输入知识图谱名称');
-        return;
-      }
-
-      if (selectedFiles.length === 0) {
-        alert('请至少选择一个文件');
-        return;
-      }
-
-      // 获取算法配置
-      const algorithms = {
-        preprocess: document.getElementById('preprocess').value,
-        entity_extraction: document.getElementById('entity-extraction').value,
-        relation_extraction: document.getElementById('relation-extraction').value,
-        knowledge_completion: document.getElementById('knowledge-completion').value
-      };
-
-      const modelApiKey = document.getElementById('model-api-key').value;
-      const enableCompletion = document.getElementById('enable-completion').checked;
-      const enableVisualization = document.getElementById('enable-visualization').checked;
-
-      try {
-        // 隐藏创建模态框
-        hideCreateKGModal();
-
-        // 显示进度模态框
-        showProgressModal('正在创建知识图谱', '正在初始化知识图谱构建过程...');
-
-        const response = await fetch(`${API_BASE_URL}/api/v1/kg/create`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${state.token}`
-          },
-          body: JSON.stringify({
-            file_ids: selectedFiles,
-            kg_name: kgName,
-            algorithms,
-            model_api_key: modelApiKey || null,
-            enable_completion: enableCompletion,
-            enable_visualization: enableVisualization
-          })
+        // 获取选中的文件ID
+        const selectedFiles = [];
+        document.querySelectorAll('#file-selection-container input[type="checkbox"]:checked').forEach(checkbox => {
+            selectedFiles.push(checkbox.value);
         });
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.detail || '知识图谱创建失败');
+        // 简单验证
+        if (!kgName) {
+            alert('请输入知识图谱名称');
+            return;
         }
 
-        const data = await response.json();
+        if (selectedFiles.length === 0) {
+            alert('请至少选择一个文件');
+            return;
+        }
 
-        // 开始轮询构建进度
-        pollKGProgress(data.task_id);
+        // 获取算法配置
+        const algorithms = {
+            preprocess: document.getElementById('preprocess').value,
+            entity_extraction: document.getElementById('entity-extraction').value,
+            relation_extraction: document.getElementById('relation-extraction').value,
+            knowledge_completion: document.getElementById('knowledge-completion').value
+        };
 
-        // 重置表单
-        document.getElementById('kg-name').value = '';
-        document.getElementById('model-api-key').value = '';
-        document.querySelectorAll('#file-selection-container input[type="checkbox"]').forEach(checkbox => {
-          checkbox.checked = false;
-        });
-      } catch (error) {
-        console.error('知识图谱创建失败:', error);
-        hideProgressModal();
-        alert('知识图谱创建失败: ' + error.message);
-      }
+        const modelApiKey = document.getElementById('model-api-key').value;
+        const enableCompletion = document.getElementById('enable-completion').checked;
+        const enableVisualization = document.getElementById('enable-visualization').checked;
+
+        try {
+            // 隐藏创建模态框
+            hideCreateKGModal();
+
+            // 显示进度模态框
+            showProgressModal('正在创建知识图谱', '正在初始化知识图谱构建过程...');
+
+            const response = await fetch(`${API_BASE_URL}/api/v1/kg/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}`
+                },
+                body: JSON.stringify({
+                    file_ids: selectedFiles,
+                    kg_name: kgName,
+                    algorithms,
+                    model_api_key: modelApiKey || null,
+                    enable_completion: enableCompletion,
+                    enable_visualization: enableVisualization
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || '知识图谱创建失败');
+            }
+
+            const data = await response.json();
+
+            // 开始轮询构建进度
+            pollKGProgress(data.task_id);
+
+            // 重置表单
+            document.getElementById('kg-name').value = '';
+            document.getElementById('model-api-key').value = '';
+            document.querySelectorAll('#file-selection-container input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        } catch (error) {
+            console.error('知识图谱创建失败:', error);
+            hideProgressModal();
+            alert('知识图谱创建失败: ' + error.message);
+        }
     }
 
     // 轮询知识图谱构建进度
     async function pollKGProgress(taskId) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/kg/progress/${taskId}`, {
-          headers: {
-            'Authorization': `Bearer ${state.token}`
-          }
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/kg/progress/${taskId}`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('获取构建进度失败');
+            }
+
+            const progressData = await response.json();
+
+            // 更新进度
+            updateProgressModal(
+                progressData.progress,
+                progressData.stage || '处理中',
+                progressData.message || '正在处理...'
+            );
+
+            // 如果未完成，继续轮询
+            if (progressData.progress < 100 && progressData.status !== 'failed') {
+                setTimeout(() => {
+                    pollKGProgress(taskId);
+                }, 3000);
+            } else if (progressData.status === 'failed') {
+                // 处理失败
+                setTimeout(() => {
+                    hideProgressModal();
+                    alert('知识图谱构建失败: ' + (progressData.message || '未知错误'));
+                }, 1000);
+            } else {
+                // 完成
+                setTimeout(() => {
+                    hideProgressModal();
+                    alert('知识图谱构建完成！');
+
+                    // 切换到知识图谱视图并刷新列表
+                    switchView('kg-view');
+                    fetchKnowledgeGraphs();
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('获取构建进度失败:', error);
+            setTimeout(() => {
+                hideProgressModal();
+                alert('获取构建进度失败: ' + error.message);
+            }, 1000);
+        }
+    }
+
+    // 更新最近知识图谱表格的函数
+    function updateRecentKGTable() {
+        const recentTableBody = document.getElementById('recent-kg-table');
+
+        if (!state.knowledgeGraphs || state.knowledgeGraphs.length === 0) {
+            recentTableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="py-8 text-center text-gray-500">
+          <i class="fa fa-folder-open-o text-3xl mb-2"></i>
+          <p>暂无知识图谱数据</p>
+          <p class="text-sm mt-1">点击"创建知识图谱"开始构建您的第一个知识图谱</p>
+        </td>
+      </tr>
+    `;
+            return;
+        }
+
+        // 渲染最近知识图谱（最多显示3个）
+        const recentKGs = [...state.knowledgeGraphs]
+            .sort((a, b) => new Date(b.create_time) - new Date(a.create_time))
+            .slice(0, 3);
+
+        let recentHtml = '';
+        recentKGs.forEach(kg => {
+            // 确保字段名正确
+            const kgId = kg.kg_id || kg.id;
+            const name = kg.name || '未命名';
+            const entityCount = kg.entity_count || 0;
+            const relationCount = kg.relation_count || 0;
+            const createTime = kg.create_time || kg.created_at;
+            const status = kg.status || 'completed';
+
+            const {badgeClass, statusText} = getKGStatusBadge(status);
+
+            recentHtml += `<tr class="border-b border-gray-100 hover:bg-gray-50">
+        <td class="py-4 font-medium">${name}</td>
+        <td class="py-4">${entityCount}</td>
+        <td class="py-4">${relationCount}</td>
+        <td class="py-4 text-gray-500 text-sm">${formatDate(createTime)}</td>
+        <td class="py-4">
+          <span class="badge ${badgeClass}">${statusText}</span>
+        </td>
+        <td class="py-4">
+          <div class="flex gap-2">
+            <button class="text-primary hover:text-primary/80" onclick="viewKGDetails('${kgId}')" title="查看详情">
+              <i class="fa fa-eye"></i>
+            </button>
+            <button class="text-accent hover:text-accent/80" onclick="startQAWithKG('${kgId}', '${name.replace(/'/g, "\\'")}')" title="问答对话">
+              <i class="fa fa-comments"></i>
+            </button>
+          </div>
+        </td>
+      </tr>`;
         });
 
-        if (!response.ok) {
-          throw new Error('获取构建进度失败');
-        }
-
-        const progressData = await response.json();
-
-        // 更新进度
-        updateProgressModal(
-          progressData.progress,
-          progressData.stage || '处理中',
-          progressData.message || '正在处理...'
-        );
-
-        // 如果未完成，继续轮询
-        if (progressData.progress < 100 && progressData.status !== 'failed') {
-          setTimeout(() => {
-            pollKGProgress(taskId);
-          }, 3000);
-        } else if (progressData.status === 'failed') {
-          // 处理失败
-          setTimeout(() => {
-            hideProgressModal();
-            alert('知识图谱构建失败: ' + (progressData.message || '未知错误'));
-          }, 1000);
-        } else {
-          // 完成
-          setTimeout(() => {
-            hideProgressModal();
-            alert('知识图谱构建完成！');
-
-            // 切换到知识图谱视图并刷新列表
-            switchView('kg-view');
-            fetchKnowledgeGraphs();
-          }, 1000);
-        }
-      } catch (error) {
-        console.error('获取构建进度失败:', error);
-        setTimeout(() => {
-          hideProgressModal();
-          alert('获取构建进度失败: ' + error.message);
-        }, 1000);
-      }
+        recentTableBody.innerHTML = recentHtml;
     }
+
 
     // 获取知识图谱列表
     async function fetchKnowledgeGraphs() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/kg/list`, {
-          headers: {
-            'Authorization': `Bearer ${state.token}`
-          }
-        });
+        try {
+            console.log('开始获取知识图谱列表...');
 
-        if (!response.ok) {
-          throw new Error('获取知识图谱列表失败');
+            // 使用普通的fetch加上认证头
+            const response = await fetch(`${API_BASE_URL}/api/v1/kg/list`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('响应状态:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('获取知识图谱列表失败:', errorText);
+                throw new Error('获取知识图谱列表失败');
+            }
+
+            const result = await response.json();
+            console.log('API响应数据:', result);
+
+            // 检查数据结构
+            if (result && result.graphs) {
+                state.knowledgeGraphs = result.graphs;
+                console.log('处理后的知识图谱数据:', state.knowledgeGraphs);
+            } else {
+                console.error('API返回的数据格式不正确:', result);
+                state.knowledgeGraphs = [];
+            }
+
+            // 更新知识图谱表格
+            renderKGTable();
+
+            // 更新问答页面的知识图谱选择
+            populateKGSelectForQA();
+
+        } catch (error) {
+            console.error('获取知识图谱列表失败:', error);
+            state.knowledgeGraphs = [];
+            renderKGTable();
         }
-
-        const knowledgeGraphs = await response.json();
-        state.knowledgeGraphs = knowledgeGraphs;
-
-        // 更新知识图谱表格
-        renderKGTable();
-
-        // 更新问答页面的知识图谱选择
-        populateKGSelectForQA();
-      } catch (error) {
-        console.error('获取知识图谱列表失败:', error);
-      }
     }
 
     // 渲染知识图谱表格
     function renderKGTable() {
-      const tableBody = document.getElementById('kg-table');
-      const recentTableBody = document.getElementById('recent-kg-table');
+        const tableBody = document.getElementById('kg-table');
+        const recentTableBody = document.getElementById('recent-kg-table');
 
-      if (state.knowledgeGraphs.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="6" class="py-8 text-center text-gray-500">
-              <i class="fa fa-sitemap text-3xl mb-2"></i>
-              <p>暂无知识图谱</p>
-              <p class="text-sm mt-1">点击"创建知识图谱"按钮开始创建</p>
-            </td>
-          </tr>
-        `;
+        if (state.knowledgeGraphs.length === 0) {
+            tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="py-8 text-center text-gray-500">
+          <i class="fa fa-sitemap text-3xl mb-2"></i>
+          <p>暂无知识图谱</p>
+          <p class="text-sm mt-1">点击"创建知识图谱"按钮开始创建</p>
+        </td>
+      </tr>
+    `;
+            return;
+        }
 
-        recentTableBody.innerHTML = `
-          <tr>
-            <td colspan="6" class="py-8 text-center text-gray-500">
-              <i class="fa fa-folder-open-o text-3xl mb-2"></i>
-              <p>暂无知识图谱数据</p>
-              <p class="text-sm mt-1">点击"创建知识图谱"开始构建您的第一个知识图谱</p>
-            </td>
-          </tr>
-        `;
+        // 渲染完整列表
+        let html = '';
+        state.knowledgeGraphs.forEach(kg => {
+            // 获取状态标签样式
+            const {badgeClass, statusText} = getKGStatusBadge(kg.status);
 
-        return;
-      }
+            // 转义单引号，防止JavaScript错误
+            const safeName = kg.name.replace(/'/g, "\\'");
+            const safeKgId = kg.kg_id.replace(/'/g, "\\'");
 
-      // 渲染完整列表
-      let html = '';
-      state.knowledgeGraphs.forEach(kg => {
-        // 获取状态标签样式
-        const { badgeClass, statusText } = getKGStatusBadge(kg.status);
+            html += `<tr class="border-b border-gray-100 hover:bg-gray-50">
+        <td class="py-4 font-medium">${kg.name}</td>
+        <td class="py-4">${kg.entity_count || 0}</td>
+        <td class="py-4">${kg.relation_count || 0}</td>
+        <td class="py-4 text-gray-500 text-sm">${formatDate(kg.create_time)}</td>
+        <td class="py-4">
+          <span class="badge ${badgeClass}">${statusText}</span>
+        </td>
+        <td class="py-4">
+          <div class="flex gap-2">
+            <button class="text-primary hover:text-primary/80" onclick="viewKGDetails('${safeKgId}')" title="查看详情">
+              <i class="fa fa-eye"></i>
+            </button>
+            <button class="text-accent hover:text-accent/80" onclick="startQAWithKG('${safeKgId}', '${safeName}')" title="问答对话">
+              <i class="fa fa-comments"></i>
+            </button>
+            <button class="text-danger hover:text-danger/80" onclick="showDeleteKGConfirm('${safeKgId}', '${safeName}')" title="删除">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+        });
 
-        html += `
-          <tr class="border-b border-gray-100 hover:bg-gray-50">
-            <td class="py-4 font-medium">${kg.kg_name}</td>
-            <td class="py-4">${kg.entity_count || 0}</td>
-            <td class="py-4">${kg.relation_count || 0}</td>
-            <td class="py-4 text-gray-500 text-sm">${formatDate(kg.create_time)}</td>
-            <td class="py-4">
-              <span class="badge ${badgeClass}">${statusText}</span>
-            </td>
-            <td class="py-4">
-              <div class="flex gap-2">
-                <button class="text-primary hover:text-primary/80" onclick="viewKGDetails('${kg.kg_id}')" title="查看详情">
-                  <i class="fa fa-eye"></i>
-                </button>
-                <button class="text-accent hover:text-accent/80" onclick="startQAWithKG('${kg.kg_id}', '${kg.kg_name}')" title="问答对话">
-                  <i class="fa fa-comments"></i>
-                </button>
-                <button class="text-danger hover:text-danger/80" onclick="showDeleteKGConfirm('${kg.kg_id}', '${kg.kg_name}')" title="删除">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
-      });
+        tableBody.innerHTML = html;
 
-      tableBody.innerHTML = html;
-
-      // 渲染最近知识图谱（最多显示3个）
-      const recentKGs = [...state.knowledgeGraphs]
-        .sort((a, b) => new Date(b.create_time) - new Date(a.create_time))
-        .slice(0, 3);
-
-      let recentHtml = '';
-      recentKGs.forEach(kg => {
-        const { badgeClass, statusText } = getKGStatusBadge(kg.status);
-
-        recentHtml += `
-          <tr class="border-b border-gray-100 hover:bg-gray-50">
-            <td class="py-4 font-medium">${kg.kg_name}</td>
-            <td class="py-4">${kg.entity_count || 0}</td>
-            <td class="py-4">${kg.relation_count || 0}</td>
-            <td class="py-4 text-gray-500 text-sm">${formatDate(kg.create_time)}</td>
-            <td class="py-4">
-              <span class="badge ${badgeClass}">${statusText}</span>
-            </td>
-            <td class="py-4">
-              <div class="flex gap-2">
-                <button class="text-primary hover:text-primary/80 nav-link" onclick="viewKGDetails('${kg.kg_id}')" title="查看详情">
-                  <i class="fa fa-eye"></i>
-                </button>
-                <button class="text-accent hover:text-accent/80 nav-link" onclick="startQAWithKG('${kg.kg_id}', '${kg.kg_name}')" title="问答对话">
-                  <i class="fa fa-comments"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
-      });
-
-      recentTableBody.innerHTML = recentHtml;
+        // 更新最近知识图谱表格
+        updateRecentKGTable();
     }
 
     // 查看知识图谱详情
     function viewKGDetails(kgId) {
-      const kg = state.knowledgeGraphs.find(k => k.kg_id === kgId);
-      if (!kg) return;
+        const kg = state.knowledgeGraphs.find(k => k.kg_id === kgId);
+        if (!kg) return;
 
-      state.currentKGId = kgId;
+        state.currentKGId = kgId;
 
-      // 更新详情页面信息
-      document.getElementById('kg-detail-name').textContent = kg.kg_name;
-      document.getElementById('kg-detail-meta').textContent =
-        `创建于 ${formatDate(kg.create_time)} · 包含 ${kg.entity_count || 0} 个实体 · ${kg.relation_count || 0} 个关系`;
+        // 更新详情页面信息
+        document.getElementById('kg-detail-name').textContent = kg.kg_name;
+        document.getElementById('kg-detail-meta').textContent =
+            `创建于 ${formatDate(kg.create_time)} · 包含 ${kg.entity_count || 0} 个实体 · ${kg.relation_count || 0} 个关系`;
 
-      // 显示详情区域
-      document.getElementById('kg-detail-section').classList.remove('hidden');
+        // 显示详情区域
+        document.getElementById('kg-detail-section').classList.remove('hidden');
 
-      // 可视化知识图谱
-      visualizeKG(kgId);
+        // 可视化知识图谱
+        visualizeKG(kgId);
     }
 
     // 可视化知识图谱
     async function visualizeKG(kgId) {
-      const container = document.getElementById('kg-visualization');
+        const container = document.getElementById('kg-visualization');
 
-      // 显示加载状态
-      container.innerHTML = `
-        <div class="w-full h-full flex items-center justify-center text-gray-400">
-          <div class="text-center">
-            <i class="fa fa-spinner fa-spin text-2xl mb-3"></i>
-            <p>正在加载知识图谱...</p>
-          </div>
-        </div>
-      `;
-
-      try {
-        // 这里简化处理，实际应该调用API获取图谱数据
-        // 为了演示，使用模拟数据
-        const nodes = [
-          { id: 1, label: '实体1', group: 1 },
-          { id: 2, label: '实体2', group: 2 },
-          { id: 3, label: '实体3', group: 1 },
-          { id: 4, label: '实体4', group: 3 },
-          { id: 5, label: '实体5', group: 2 }
-        ];
-
-        const edges = [
-          { from: 1, to: 2, label: '关系1' },
-          { from: 1, to: 3, label: '关系2' },
-          { from: 2, to: 5, label: '关系3' },
-          { from: 3, to: 4, label: '关系4' },
-          { from: 4, to: 5, label: '关系5' }
-        ];
-
-        // 创建网络
-        const data = {
-          nodes: nodes,
-          edges: edges
-        };
-
-        const options = {
-          nodes: {
-            shape: 'ellipse',
-            size: 25,
-            font: {
-              size: 14
-            }
-          },
-          edges: {
-            font: {
-              size: 12,
-              align: 'middle'
-            },
-            length: 150,
-            color: {
-              color: '#999',
-              highlight: '#333'
-            }
-          },
-          physics: {
-            forceAtlas2Based: {
-              gravitationalConstant: -26,
-              centralGravity: 0.005,
-              springLength: 230,
-              springConstant: 0.18
-            },
-            maxVelocity: 146,
-            solver: 'forceAtlas2Based',
-            timestep: 0.35,
-            stabilization: { iterations: 150 }
-          }
-        };
-
-        // 清空容器并创建网络
-        container.innerHTML = '';
-        new vis.Network(container, data, options);
-      } catch (error) {
-        console.error('知识图谱可视化失败:', error);
+        // 显示加载状态
         container.innerHTML = `
-          <div class="w-full h-full flex items-center justify-center text-gray-400">
-            <div class="text-center">
-              <i class="fa fa-exclamation-triangle text-2xl mb-3 text-warning"></i>
-              <p>知识图谱加载失败</p>
-              <button class="mt-2 text-primary hover:underline text-sm" onclick="visualizeKG('${kgId}')">重试</button>
-            </div>
-          </div>
-        `;
-      }
+    <div class="w-full h-full flex items-center justify-center text-gray-400">
+      <div class="text-center">
+        <i class="fa fa-spinner fa-spin text-2xl mb-3"></i>
+        <p>正在加载知识图谱数据...</p>
+      </div>
+    </div>
+  `;
+
+        try {
+            // 调用后端API获取真实数据
+            const response = await fetch(`${API_BASE_URL}/api/v1/kg/${kgId}/visualize`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('获取可视化数据失败');
+            }
+
+            const data = await response.json();
+
+            // 创建 vis.js 所需的数据格式
+            const nodes = new vis.DataSet(data.nodes || []);
+            const edges = new vis.DataSet(data.edges || []);
+
+            // 创建网络
+            const networkData = {
+                nodes: nodes,
+                edges: edges
+            };
+
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    size: 20,
+                    font: {
+                        size: 12,
+                        face: 'Tahoma'
+                    },
+                    borderWidth: 2
+                },
+                edges: {
+                    width: 2,
+                    smooth: {
+                        type: 'continuous'
+                    }
+                },
+                physics: {
+                    stabilization: true,
+                    barnesHut: {
+                        gravitationalConstant: -80000,
+                        springConstant: 0.001,
+                        springLength: 200
+                    }
+                },
+                interaction: {
+                    tooltipDelay: 200,
+                    hideEdgesOnDrag: true
+                }
+            };
+
+            // 清空容器并创建网络
+            container.innerHTML = '';
+            new vis.Network(container, networkData, options);
+
+        } catch (error) {
+            console.error('知识图谱可视化失败:', error);
+            container.innerHTML = `
+      <div class="w-full h-full flex items-center justify-center text-gray-400">
+        <div class="text-center">
+          <i class="fa fa-exclamation-triangle text-2xl mb-3 text-warning"></i>
+          <p>知识图谱加载失败: ${error.message}</p>
+          <button class="mt-2 text-primary hover:underline text-sm" onclick="visualizeKG('${kgId}')">重试</button>
+        </div>
+      </div>
+    `;
+        }
     }
 
     // 显示知识图谱查询模态框
     function showKGQueryModal() {
-      if (!state.currentKGId) {
-        alert('请先选择一个知识图谱');
-        return;
-      }
+        if (!state.currentKGId) {
+            alert('请先选择一个知识图谱');
+            return;
+        }
 
-      document.getElementById('kg-query-modal').classList.remove('hidden');
+        document.getElementById('kg-query-modal').classList.remove('hidden');
     }
 
     // 隐藏知识图谱查询模态框
     function hideKGQueryModal() {
-      document.getElementById('kg-query-modal').classList.add('hidden');
+        document.getElementById('kg-query-modal').classList.add('hidden');
     }
 
     // 处理知识图谱查询
     async function handleKGQuery() {
-      const queryContent = document.getElementById('query-content').value;
-      const queryType = document.getElementById('query-type').value;
-      const topK = parseInt(document.getElementById('query-top-k').value);
-      const includeEntities = document.getElementById('include-entities').checked;
-      const includeRelations = document.getElementById('include-relations').checked;
+        const queryContent = document.getElementById('query-content').value;
+        const queryType = document.getElementById('query-type').value;
+        const topK = parseInt(document.getElementById('query-top-k').value);
+        const includeEntities = document.getElementById('include-entities').checked;
+        const includeRelations = document.getElementById('include-relations').checked;
 
-      // 简单验证
-      if (!queryContent) {
-        alert('请输入查询内容');
-        return;
-      }
-
-      try {
-        // 隐藏查询模态框
-        hideKGQueryModal();
-
-        // 显示进度模态框
-        showProgressModal('正在查询', '正在查询知识图谱，请稍候...');
-
-        const response = await fetch(`${API_BASE_URL}/api/v1/kg/query`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${state.token}`
-          },
-          body: JSON.stringify({
-            kg_id: state.currentKGId,
-            query: queryContent,
-            query_type: queryType,
-            top_k: topK,
-            include_entities: includeEntities,
-            include_relations: includeRelations
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.detail || '查询失败');
+        // 简单验证
+        if (!queryContent) {
+            alert('请输入查询内容');
+            return;
         }
 
-        const result = await response.json();
+        try {
+            // 隐藏查询模态框
+            hideKGQueryModal();
 
-        // 隐藏进度模态框
-        hideProgressModal();
+            // 显示进度模态框
+            showProgressModal('正在查询', '正在查询知识图谱，请稍候...');
 
-        // 显示查询结果
-        showQueryResult(result, queryContent);
-      } catch (error) {
-        console.error('知识图谱查询失败:', error);
-        hideProgressModal();
-        alert('查询失败: ' + error.message);
-      }
+            const response = await fetch(`${API_BASE_URL}/api/v1/kg/query`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}`
+                },
+                body: JSON.stringify({
+                    kg_id: state.currentKGId,
+                    query: queryContent,
+                    query_type: queryType,
+                    top_k: topK,
+                    include_entities: includeEntities,
+                    include_relations: includeRelations
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || '查询失败');
+            }
+
+            const result = await response.json();
+
+            // 隐藏进度模态框
+            hideProgressModal();
+
+            // 显示查询结果
+            showQueryResult(result, queryContent);
+        } catch (error) {
+            console.error('知识图谱查询失败:', error);
+            hideProgressModal();
+            alert('查询失败: ' + error.message);
+        }
     }
 
     // 显示查询结果
     function showQueryResult(result, queryContent) {
-      // 更新结果内容
-      document.getElementById('result-query-content').textContent = queryContent;
-      document.getElementById('result-answer').textContent = result.answer || '未找到相关答案';
+        // 更新结果内容
+        document.getElementById('result-query-content').textContent = queryContent;
+        document.getElementById('result-answer').textContent = result.answer || '未找到相关答案';
 
-      // 更新实体
-      const entitiesContainer = document.getElementById('result-entities');
-      document.getElementById('entities-count').textContent = result.entities ? result.entities.length : 0;
+        // 更新实体
+        const entitiesContainer = document.getElementById('result-entities');
+        document.getElementById('entities-count').textContent = result.entities ? result.entities.length : 0;
 
-      if (result.entities && result.entities.length > 0) {
-        let entitiesHtml = '';
-        result.entities.forEach(entity => {
-          entitiesHtml += `
+        if (result.entities && result.entities.length > 0) {
+            let entitiesHtml = '';
+            result.entities.forEach(entity => {
+                entitiesHtml += `
             <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
               <div class="font-medium">${entity.name || '未命名实体'}</div>
               ${entity.type ? `<div class="text-xs text-gray-500">类型: ${entity.type}</div>` : ''}
             </div>
           `;
-        });
-        entitiesContainer.innerHTML = entitiesHtml;
-      } else {
-        entitiesContainer.innerHTML = '<p class="text-gray-500 text-sm italic">无相关实体</p>';
-      }
+            });
+            entitiesContainer.innerHTML = entitiesHtml;
+        } else {
+            entitiesContainer.innerHTML = '<p class="text-gray-500 text-sm italic">无相关实体</p>';
+        }
 
-      // 更新关系
-      const relationsContainer = document.getElementById('result-relations');
-      document.getElementById('relations-count').textContent = result.relations ? result.relations.length : 0;
+        // 更新关系
+        const relationsContainer = document.getElementById('result-relations');
+        document.getElementById('relations-count').textContent = result.relations ? result.relations.length : 0;
 
-      if (result.relations && result.relations.length > 0) {
-        let relationsHtml = '';
-        result.relations.forEach(relation => {
-          relationsHtml += `
+        if (result.relations && result.relations.length > 0) {
+            let relationsHtml = '';
+            result.relations.forEach(relation => {
+                relationsHtml += `
             <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
               <div class="flex items-center justify-between">
                 <span class="font-medium">${relation.source || '来源'}</span>
@@ -1979,155 +2050,156 @@
               </div>
             </div>
           `;
-        });
-        relationsContainer.innerHTML = relationsHtml;
-      } else {
-        relationsContainer.innerHTML = '<p class="text-gray-500 text-sm italic">无相关关系</p>';
-      }
+            });
+            relationsContainer.innerHTML = relationsHtml;
+        } else {
+            relationsContainer.innerHTML = '<p class="text-gray-500 text-sm italic">无相关关系</p>';
+        }
 
-      // 显示结果模态框
-      document.getElementById('query-result-modal').classList.remove('hidden');
+        // 显示结果模态框
+        document.getElementById('query-result-modal').classList.remove('hidden');
     }
 
     // 隐藏查询结果模态框
     function hideQueryResultModal() {
-      document.getElementById('query-result-modal').classList.add('hidden');
+        document.getElementById('query-result-modal').classList.add('hidden');
     }
 
     // 填充问答页面的知识图谱选择
+    // 填充问答页面的知识图谱选择
     function populateKGSelectForQA() {
-      const select = document.getElementById('qa-kg-select');
+        const select = document.getElementById('qa-kg-select');
 
-      // 保存当前选中值
-      const currentValue = select.value;
+        // 保存当前选中值
+        const currentValue = select.value;
 
-      // 清空现有选项（保留第一个提示选项）
-      select.innerHTML = '<option value="">选择知识图谱</option>';
+        // 清空现有选项（保留第一个提示选项）
+        select.innerHTML = '<option value="">选择知识图谱</option>';
 
-      if (state.knowledgeGraphs.length === 0) {
-        // 禁用问答输入
-        document.getElementById('question-input').disabled = true;
-        document.getElementById('send-question').disabled = true;
-        return;
-      }
+        if (state.knowledgeGraphs.length === 0) {
+            // 禁用问答输入
+            document.getElementById('question-input').disabled = true;
+            document.getElementById('send-question').disabled = true;
+            return;
+        }
 
-      // 添加知识图谱选项
-      state.knowledgeGraphs.forEach(kg => {
-        const option = document.createElement('option');
-        option.value = kg.kg_id;
-        option.textContent = kg.kg_name;
-        select.appendChild(option);
-      });
+        // 添加知识图谱选项
+        state.knowledgeGraphs.forEach(kg => {
+            const option = document.createElement('option');
+            option.value = kg.kg_id;  // 使用 kg_id
+            option.textContent = kg.name;
+            select.appendChild(option);
+        });
 
-      // 恢复选中值
-      if (currentValue) {
-        select.value = currentValue;
-      }
+        // 恢复选中值
+        if (currentValue) {
+            select.value = currentValue;
+        }
     }
 
     // 处理问答的知识图谱选择
     function handleKGSelectForQA(e) {
-      const kgId = e.target.value;
+        const kgId = e.target.value;
 
-      if (kgId) {
-        state.currentKGId = kgId;
-        // 启用问答输入
-        document.getElementById('question-input').disabled = false;
-        document.getElementById('send-question').disabled = false;
+        if (kgId) {
+            state.currentKGId = kgId;
+            // 启用问答输入
+            document.getElementById('question-input').disabled = false;
+            document.getElementById('send-question').disabled = false;
 
-        // 获取或创建会话ID
-        if (!state.currentSessionId) {
-          state.currentSessionId = generateSessionId();
+            // 获取或创建会话ID
+            if (!state.currentSessionId) {
+                state.currentSessionId = generateSessionId();
+            }
+
+            // 加载该知识图谱的问答历史
+            fetchQAHistory(kgId);
+        } else {
+            // 禁用问答输入
+            document.getElementById('question-input').disabled = true;
+            document.getElementById('send-question').disabled = true;
+            state.currentKGId = null;
         }
-
-        // 加载该知识图谱的问答历史
-        fetchQAHistory(kgId);
-      } else {
-        // 禁用问答输入
-        document.getElementById('question-input').disabled = true;
-        document.getElementById('send-question').disabled = true;
-        state.currentKGId = null;
-      }
     }
 
     // 发送问题
     async function sendQuestion() {
-      const question = document.getElementById('question-input').value.trim();
+        const question = document.getElementById('question-input').value.trim();
 
-      if (!question) return;
+        if (!question) return;
 
-      if (!state.currentKGId) {
-        alert('请先选择一个知识图谱');
-        return;
-      }
-
-      // 获取或创建会话ID
-      if (!state.currentSessionId) {
-        state.currentSessionId = generateSessionId();
-      }
-
-      try {
-        // 在聊天历史中添加用户问题
-        addMessageToHistory(question, 'user');
-
-        // 清空输入框
-        document.getElementById('question-input').value = '';
-
-        // 显示"正在思考"提示
-        const thinkingMessageId = addMessageToHistory('正在思考...', 'ai', true);
-
-        const response = await fetch(`${API_BASE_URL}/api/v1/qa/chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${state.token}`
-          },
-          body: JSON.stringify({
-            kg_id: state.currentKGId,
-            question: question,
-            top_k: 5,
-            use_context: true,
-            session_id: state.currentSessionId
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.detail || '问答失败');
+        if (!state.currentKGId) {
+            alert('请先选择一个知识图谱');
+            return;
         }
 
-        const result = await response.json();
+        // 获取或创建会话ID
+        if (!state.currentSessionId) {
+            state.currentSessionId = generateSessionId();
+        }
 
-        // 移除"正在思考"提示
-        removeMessageFromHistory(thinkingMessageId);
+        try {
+            // 在聊天历史中添加用户问题
+            addMessageToHistory(question, 'user');
 
-        // 添加AI回答
-        addMessageToHistory(result.answer, 'ai');
+            // 清空输入框
+            document.getElementById('question-input').value = '';
 
-        // 更新相关实体和关系
-        updateRelatedEntitiesAndRelations(result.related_entities, result.related_relations);
-      } catch (error) {
-        console.error('问答失败:', error);
-        // 移除"正在思考"提示
-        document.getElementById('chat-history').lastChild.remove();
-        addMessageToHistory(`出错了: ${error.message}`, 'ai');
-      }
+            // 显示"正在思考"提示
+            const thinkingMessageId = addMessageToHistory('正在思考...', 'ai', true);
+
+            const response = await fetch(`${API_BASE_URL}/api/v1/qa/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}`
+                },
+                body: JSON.stringify({
+                    kg_id: state.currentKGId,
+                    question: question,
+                    top_k: 5,
+                    use_context: true,
+                    session_id: state.currentSessionId
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || '问答失败');
+            }
+
+            const result = await response.json();
+
+            // 移除"正在思考"提示
+            removeMessageFromHistory(thinkingMessageId);
+
+            // 添加AI回答
+            addMessageToHistory(result.answer, 'ai');
+
+            // 更新相关实体和关系
+            updateRelatedEntitiesAndRelations(result.related_entities, result.related_relations);
+        } catch (error) {
+            console.error('问答失败:', error);
+            // 移除"正在思考"提示
+            document.getElementById('chat-history').lastChild.remove();
+            addMessageToHistory(`出错了: ${error.message}`, 'ai');
+        }
     }
 
     // 添加消息到聊天历史
     function addMessageToHistory(content, sender, isThinking = false) {
-      const chatHistory = document.getElementById('chat-history');
-      const messageId = `msg-${Date.now()}`;
+        const chatHistory = document.getElementById('chat-history');
+        const messageId = `msg-${Date.now()}`;
 
-      const messageDiv = document.createElement('div');
-      messageDiv.id = messageId;
-      messageDiv.className = `flex ${sender === 'user' ? 'justify-start' : 'justify-end'}`;
+        const messageDiv = document.createElement('div');
+        messageDiv.id = messageId;
+        messageDiv.className = `flex ${sender === 'user' ? 'justify-start' : 'justify-end'}`;
 
-      const bubbleClass = sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai';
-      const icon = sender === 'user' ? 'fa-user' : 'fa-robot';
-      const iconColor = sender === 'user' ? 'text-gray-500' : 'text-primary';
+        const bubbleClass = sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai';
+        const icon = sender === 'user' ? 'fa-user' : 'fa-robot';
+        const iconColor = sender === 'user' ? 'text-gray-500' : 'text-primary';
 
-      messageDiv.innerHTML = `
+        messageDiv.innerHTML = `
         <div class="${bubbleClass}">
           <div class="flex items-center gap-2 mb-2">
             <i class="fa ${icon} ${iconColor} text-sm"></i>
@@ -2140,108 +2212,108 @@
         </div>
       `;
 
-      chatHistory.appendChild(messageDiv);
-      chatHistory.scrollTop = chatHistory.scrollHeight;
+        chatHistory.appendChild(messageDiv);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
 
-      return messageId;
+        return messageId;
     }
 
     // 从聊天历史中移除消息
     function removeMessageFromHistory(messageId) {
-      const message = document.getElementById(messageId);
-      if (message) {
-        message.remove();
-      }
+        const message = document.getElementById(messageId);
+        if (message) {
+            message.remove();
+        }
     }
 
     // 更新相关实体和关系
     function updateRelatedEntitiesAndRelations(entities, relations) {
-      const entitiesContainer = document.getElementById('entities-container');
-      const relationsContainer = document.getElementById('relations-container');
+        const entitiesContainer = document.getElementById('entities-container');
+        const relationsContainer = document.getElementById('relations-container');
 
-      // 更新实体
-      if (entities && entities.length > 0) {
-        let entitiesHtml = '';
-        entities.forEach(entity => {
-          entitiesHtml += `
+        // 更新实体
+        if (entities && entities.length > 0) {
+            let entitiesHtml = '';
+            entities.forEach(entity => {
+                entitiesHtml += `
             <div class="bg-gray-50 p-2 rounded-lg text-sm">
               ${entity.name || '未命名实体'}
               ${entity.type ? `<span class="text-xs text-gray-500 ml-1">(${entity.type})</span>` : ''}
             </div>
           `;
-        });
-        entitiesContainer.innerHTML = entitiesHtml;
-      } else {
-        entitiesContainer.innerHTML = '<p class="text-gray-500 text-sm italic">暂无相关实体</p>';
-      }
+            });
+            entitiesContainer.innerHTML = entitiesHtml;
+        } else {
+            entitiesContainer.innerHTML = '<p class="text-gray-500 text-sm italic">暂无相关实体</p>';
+        }
 
-      // 更新关系
-      if (relations && relations.length > 0) {
-        let relationsHtml = '';
-        relations.forEach(relation => {
-          relationsHtml += `
+        // 更新关系
+        if (relations && relations.length > 0) {
+            let relationsHtml = '';
+            relations.forEach(relation => {
+                relationsHtml += `
             <div class="bg-gray-50 p-2 rounded-lg text-sm">
               <span>${relation.source || '来源'}</span>
               <span class="text-primary mx-1">${relation.type || '关系'}</span>
               <span>${relation.target || '目标'}</span>
             </div>
           `;
-        });
-        relationsContainer.innerHTML = relationsHtml;
-      } else {
-        relationsContainer.innerHTML = '<p class="text-gray-500 text-sm italic">暂无相关关系</p>';
-      }
+            });
+            relationsContainer.innerHTML = relationsHtml;
+        } else {
+            relationsContainer.innerHTML = '<p class="text-gray-500 text-sm italic">暂无相关关系</p>';
+        }
     }
 
     // 获取问答历史
     async function fetchQAHistory(kgId = null) {
-      const chatHistory = document.getElementById('chat-history');
+        const chatHistory = document.getElementById('chat-history');
 
-      // 如果没有选择知识图谱，显示提示
-      if (!kgId && !state.currentKGId) {
-        chatHistory.innerHTML = `
+        // 如果没有选择知识图谱，显示提示
+        if (!kgId && !state.currentKGId) {
+            chatHistory.innerHTML = `
           <div class="text-center text-gray-500 py-10">
             <i class="fa fa-comments-o text-4xl mb-3"></i>
             <p>请先选择一个知识图谱开始对话</p>
           </div>
         `;
-        return;
-      }
-
-      const targetKgId = kgId || state.currentKGId;
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/qa/history?kg_id=${targetKgId}`, {
-          headers: {
-            'Authorization': `Bearer ${state.token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('获取问答历史失败');
+            return;
         }
 
-        const result = await response.json();
+        const targetKgId = kgId || state.currentKGId;
 
-        // 清空现有历史
-        chatHistory.innerHTML = '';
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/qa/history?kg_id=${targetKgId}`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
 
-        if (result.history && result.history.length > 0) {
-          // 保存会话ID
-          state.currentSessionId = result.session_id;
+            if (!response.ok) {
+                throw new Error('获取问答历史失败');
+            }
 
-          // 添加历史消息
-          result.history.forEach(item => {
-            addMessageToHistory(item.query.question, 'user');
-            addMessageToHistory(item.answer.answer, 'ai');
-          });
+            const result = await response.json();
 
-          // 更新最后一次的相关实体和关系
-          const lastAnswer = result.history[result.history.length - 1].answer;
-          updateRelatedEntitiesAndRelations(lastAnswer.related_entities, lastAnswer.related_relations);
-        } else {
-          // 显示空历史提示
-          chatHistory.innerHTML = `
+            // 清空现有历史
+            chatHistory.innerHTML = '';
+
+            if (result.history && result.history.length > 0) {
+                // 保存会话ID
+                state.currentSessionId = result.session_id;
+
+                // 添加历史消息
+                result.history.forEach(item => {
+                    addMessageToHistory(item.query.question, 'user');
+                    addMessageToHistory(item.answer.answer, 'ai');
+                });
+
+                // 更新最后一次的相关实体和关系
+                const lastAnswer = result.history[result.history.length - 1].answer;
+                updateRelatedEntitiesAndRelations(lastAnswer.related_entities, lastAnswer.related_relations);
+            } else {
+                // 显示空历史提示
+                chatHistory.innerHTML = `
             <div class="text-center text-gray-500 py-10">
               <i class="fa fa-comment-o text-4xl mb-3"></i>
               <p>暂无对话历史</p>
@@ -2249,35 +2321,35 @@
             </div>
           `;
 
-          // 重置相关实体和关系
-          updateRelatedEntitiesAndRelations([], []);
-        }
-      } catch (error) {
-        console.error('获取问答历史失败:', error);
-        chatHistory.innerHTML = `
+                // 重置相关实体和关系
+                updateRelatedEntitiesAndRelations([], []);
+            }
+        } catch (error) {
+            console.error('获取问答历史失败:', error);
+            chatHistory.innerHTML = `
           <div class="text-center text-gray-500 py-10">
             <i class="fa fa-exclamation-triangle text-4xl mb-3 text-warning"></i>
             <p>加载对话历史失败</p>
             <button class="mt-2 text-primary hover:underline text-sm" onclick="fetchQAHistory('${targetKgId}')">重试</button>
           </div>
         `;
-      }
+        }
     }
 
     // 清空问答历史
     function clearQAHistory() {
-      if (!state.currentKGId) {
-        alert('请先选择一个知识图谱');
-        return;
-      }
+        if (!state.currentKGId) {
+            alert('请先选择一个知识图谱');
+            return;
+        }
 
-      if (confirm('确定要清空当前知识图谱的问答历史吗？')) {
-        // 重置会话ID
-        state.currentSessionId = generateSessionId();
+        if (confirm('确定要清空当前知识图谱的问答历史吗？')) {
+            // 重置会话ID
+            state.currentSessionId = generateSessionId();
 
-        // 清空聊天历史
-        const chatHistory = document.getElementById('chat-history');
-        chatHistory.innerHTML = `
+            // 清空聊天历史
+            const chatHistory = document.getElementById('chat-history');
+            chatHistory.innerHTML = `
           <div class="text-center text-gray-500 py-10">
             <i class="fa fa-comment-o text-4xl mb-3"></i>
             <p>暂无对话历史</p>
@@ -2285,160 +2357,160 @@
           </div>
         `;
 
-        // 重置相关实体和关系
-        updateRelatedEntitiesAndRelations([], []);
-      }
+            // 重置相关实体和关系
+            updateRelatedEntitiesAndRelations([], []);
+        }
     }
 
     // 开始与指定知识图谱的问答
     function startQAWithKG(kgId, kgName) {
-      // 切换到问答视图
-      switchView('qa-view');
+        // 切换到问答视图
+        switchView('qa-view');
 
-      // 更新导航项状态
-      document.querySelectorAll('.nav-item').forEach(navItem => {
-        navItem.classList.remove('active');
-      });
-      document.querySelector('.nav-item[data-view="qa-view"]').classList.add('active');
+        // 更新导航项状态
+        document.querySelectorAll('.nav-item').forEach(navItem => {
+            navItem.classList.remove('active');
+        });
+        document.querySelector('.nav-item[data-view="qa-view"]').classList.add('active');
 
-      // 选择知识图谱
-      const select = document.getElementById('qa-kg-select');
-      select.value = kgId;
+        // 选择知识图谱
+        const select = document.getElementById('qa-kg-select');
+        select.value = kgId;
 
-      // 触发选择事件
-      const event = new Event('change');
-      select.dispatchEvent(event);
+        // 触发选择事件
+        const event = new Event('change');
+        select.dispatchEvent(event);
     }
 
     // 显示删除知识图谱确认
     function showDeleteKGConfirm(kgId, kgName) {
-      const messageElement = document.getElementById('delete-confirmation-message');
-      messageElement.textContent = `您确定要删除知识图谱 "${kgName}" 吗？此操作无法撤销。`;
+        const messageElement = document.getElementById('delete-confirmation-message');
+        messageElement.textContent = `您确定要删除知识图谱 "${kgName}" 吗？此操作无法撤销。`;
 
-      // 设置确认删除回调
-      document.getElementById('confirm-delete').onclick = () => {
-        deleteKG(kgId);
-      };
+        // 设置确认删除回调
+        document.getElementById('confirm-delete').onclick = () => {
+            deleteKG(kgId);
+        };
 
-      // 显示确认模态框
-      document.getElementById('confirm-delete-modal').classList.remove('hidden');
+        // 显示确认模态框
+        document.getElementById('confirm-delete-modal').classList.remove('hidden');
     }
 
     // 删除知识图谱
     async function deleteKG(kgId) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/kg/${kgId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${state.token}`
-          }
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/kg/${kgId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
 
-        if (!response.ok) {
-          throw new Error('知识图谱删除失败');
+            if (!response.ok) {
+                throw new Error('知识图谱删除失败');
+            }
+
+            // 重新加载知识图谱列表
+            fetchKnowledgeGraphs();
+
+            // 如果当前正在查看被删除的知识图谱，隐藏详情
+            if (state.currentKGId === kgId) {
+                document.getElementById('kg-detail-section').classList.add('hidden');
+                state.currentKGId = null;
+            }
+
+            // 如果当前正在与被删除的知识图谱对话，重置
+            if (document.getElementById('qa-kg-select').value === kgId) {
+                document.getElementById('qa-kg-select').value = '';
+                document.getElementById('question-input').disabled = true;
+                document.getElementById('send-question').disabled = true;
+                state.currentKGId = null;
+                state.currentSessionId = null;
+                fetchQAHistory();
+            }
+
+            // 隐藏确认模态框
+            hideConfirmDeleteModal();
+        } catch (error) {
+            console.error('知识图谱删除失败:', error);
+            alert('知识图谱删除失败: ' + error.message);
         }
-
-        // 重新加载知识图谱列表
-        fetchKnowledgeGraphs();
-
-        // 如果当前正在查看被删除的知识图谱，隐藏详情
-        if (state.currentKGId === kgId) {
-          document.getElementById('kg-detail-section').classList.add('hidden');
-          state.currentKGId = null;
-        }
-
-        // 如果当前正在与被删除的知识图谱对话，重置
-        if (document.getElementById('qa-kg-select').value === kgId) {
-          document.getElementById('qa-kg-select').value = '';
-          document.getElementById('question-input').disabled = true;
-          document.getElementById('send-question').disabled = true;
-          state.currentKGId = null;
-          state.currentSessionId = null;
-          fetchQAHistory();
-        }
-
-        // 隐藏确认模态框
-        hideConfirmDeleteModal();
-      } catch (error) {
-        console.error('知识图谱删除失败:', error);
-        alert('知识图谱删除失败: ' + error.message);
-      }
     }
 
     // 隐藏确认删除模态框
     function hideConfirmDeleteModal() {
-      document.getElementById('confirm-delete-modal').classList.add('hidden');
+        document.getElementById('confirm-delete-modal').classList.add('hidden');
     }
 
     // 显示进度模态框
     function showProgressModal(title, message) {
-      document.getElementById('progress-title').textContent = title;
-      document.getElementById('progress-message').textContent = message;
-      document.getElementById('progress-stage').textContent = '准备中';
-      document.getElementById('progress-percent').textContent = '0%';
-      document.getElementById('progress-bar').style.width = '0%';
+        document.getElementById('progress-title').textContent = title;
+        document.getElementById('progress-message').textContent = message;
+        document.getElementById('progress-stage').textContent = '准备中';
+        document.getElementById('progress-percent').textContent = '0%';
+        document.getElementById('progress-bar').style.width = '0%';
 
-      document.getElementById('progress-modal').classList.remove('hidden');
+        document.getElementById('progress-modal').classList.remove('hidden');
     }
 
     // 更新进度模态框
     function updateProgressModal(progress, stage, message) {
-      document.getElementById('progress-stage').textContent = stage;
-      document.getElementById('progress-message').textContent = message;
-      document.getElementById('progress-percent').textContent = `${progress}%`;
-      document.getElementById('progress-bar').style.width = `${progress}%`;
+        document.getElementById('progress-stage').textContent = stage;
+        document.getElementById('progress-message').textContent = message;
+        document.getElementById('progress-percent').textContent = `${progress}%`;
+        document.getElementById('progress-bar').style.width = `${progress}%`;
     }
 
     // 隐藏进度模态框
     function hideProgressModal() {
-      document.getElementById('progress-modal').classList.add('hidden');
+        document.getElementById('progress-modal').classList.add('hidden');
     }
 
     // 获取仪表盘统计数据
     async function fetchDashboardStats() {
-      // 这里简化处理，实际应该调用API获取统计数据
-      // 为了演示，直接设置一些模拟数据
-      document.getElementById('kg-count').textContent = state.knowledgeGraphs.length;
-      document.getElementById('file-count').textContent = state.files.length;
-      document.getElementById('qa-count').textContent = '0';
-      document.getElementById('entity-count').textContent = '0';
+        // 这里简化处理，实际应该调用API获取统计数据
+        // 为了演示，直接设置一些模拟数据
+        document.getElementById('kg-count').textContent = state.knowledgeGraphs.length;
+        document.getElementById('file-count').textContent = state.files.length;
+        document.getElementById('qa-count').textContent = '0';
+        document.getElementById('entity-count').textContent = '0';
 
-      // 更新最近活动
-      updateRecentActivities();
+        // 更新最近活动
+        updateRecentActivities();
     }
 
     // 更新最近活动
     function updateRecentActivities() {
-      const container = document.getElementById('recent-activities');
+        const container = document.getElementById('recent-activities');
 
-      // 模拟活动数据
-      const activities = [
-        {
-          icon: 'fa-upload',
-          color: 'text-secondary',
-          action: '上传了文件',
-          target: state.files.length > 0 ? state.files[0].file_name : 'example.txt',
-          time: '10分钟前'
-        },
-        {
-          icon: 'fa-sitemap',
-          color: 'text-primary',
-          action: '创建了知识图谱',
-          target: state.knowledgeGraphs.length > 0 ? state.knowledgeGraphs[0].kg_name : '示例图谱',
-          time: '1小时前'
-        },
-        {
-          icon: 'fa-comments',
-          color: 'text-accent',
-          action: '进行了问答对话',
-          target: '关于实体的查询',
-          time: '2小时前'
-        }
-      ];
+        // 模拟活动数据
+        const activities = [
+            {
+                icon: 'fa-upload',
+                color: 'text-secondary',
+                action: '上传了文件',
+                target: state.files.length > 0 ? state.files[0].file_name : 'example.txt',
+                time: '10分钟前'
+            },
+            {
+                icon: 'fa-sitemap',
+                color: 'text-primary',
+                action: '创建了知识图谱',
+                target: state.knowledgeGraphs.length > 0 ? state.knowledgeGraphs[0].kg_name : '示例图谱',
+                time: '1小时前'
+            },
+            {
+                icon: 'fa-comments',
+                color: 'text-accent',
+                action: '进行了问答对话',
+                target: '关于实体的查询',
+                time: '2小时前'
+            }
+        ];
 
-      let html = '';
-      activities.forEach(activity => {
-        html += `
+        let html = '';
+        activities.forEach(activity => {
+            html += `
           <div class="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
             <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center ${activity.color} flex-shrink-0">
               <i class="fa ${activity.icon}"></i>
@@ -2453,98 +2525,98 @@
             </div>
           </div>
         `;
-      });
+        });
 
-      container.innerHTML = html;
+        container.innerHTML = html;
     }
 
     // 工具函数：格式化文件大小
     function formatFileSize(bytes) {
-      if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) return '0 Bytes';
 
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     // 工具函数：获取文件图标类名
     function getFileIconClass(fileType, fileName) {
-      if (!fileType && !fileName) return 'o';
+        if (!fileType && !fileName) return 'o';
 
-      // 从文件名提取扩展名
-      const extMatch = fileName ? fileName.match(/\.([^\.]+)$/) : null;
-      const ext = extMatch ? extMatch[1].toLowerCase() : '';
-      const type = fileType ? fileType.toLowerCase() : '';
+        // 从文件名提取扩展名
+        const extMatch = fileName ? fileName.match(/\.([^\.]+)$/) : null;
+        const ext = extMatch ? extMatch[1].toLowerCase() : '';
+        const type = fileType ? fileType.toLowerCase() : '';
 
-      // 文本文件
-      if (ext === 'txt' || type.includes('text/plain')) return 'text-o';
-      if (ext === 'pdf' || type.includes('pdf')) return 'pdf-o';
-      if (ext === 'doc' || ext === 'docx' || type.includes('word')) return 'word-o';
-      if (ext === 'xls' || ext === 'xlsx' || type.includes('excel')) return 'excel-o';
-      if (ext === 'ppt' || ext === 'pptx' || type.includes('powerpoint')) return 'powerpoint-o';
+        // 文本文件
+        if (ext === 'txt' || type.includes('text/plain')) return 'text-o';
+        if (ext === 'pdf' || type.includes('pdf')) return 'pdf-o';
+        if (ext === 'doc' || ext === 'docx' || type.includes('word')) return 'word-o';
+        if (ext === 'xls' || ext === 'xlsx' || type.includes('excel')) return 'excel-o';
+        if (ext === 'ppt' || ext === 'pptx' || type.includes('powerpoint')) return 'powerpoint-o';
 
-      // 图像文件
-      if (type.includes('image')) return 'image-o';
+        // 图像文件
+        if (type.includes('image')) return 'image-o';
 
-      // 音频文件
-      if (type.includes('audio')) return 'audio-o';
+        // 音频文件
+        if (type.includes('audio')) return 'audio-o';
 
-      // 视频文件
-      if (type.includes('video')) return 'video-o';
+        // 视频文件
+        if (type.includes('video')) return 'video-o';
 
-      // 压缩文件
-      if (ext === 'zip' || ext === 'rar' || ext === '7z' || type.includes('zip')) return 'zip-o';
+        // 压缩文件
+        if (ext === 'zip' || ext === 'rar' || ext === '7z' || type.includes('zip')) return 'zip-o';
 
-      // 代码文件
-      if (ext === 'js' || ext === 'html' || ext === 'css' || ext === 'py' || ext === 'java' || ext === 'cpp') return 'code-o';
+        // 代码文件
+        if (ext === 'js' || ext === 'html' || ext === 'css' || ext === 'py' || ext === 'java' || ext === 'cpp') return 'code-o';
 
-      // 默认图标
-      return 'o';
+        // 默认图标
+        return 'o';
     }
 
     // 工具函数：获取文件扩展名
     function getFileNameExtension(fileName) {
-      if (!fileName) return '';
+        if (!fileName) return '';
 
-      const extMatch = fileName.match(/\.([^\.]+)$/);
-      return extMatch ? extMatch[1].toUpperCase() : '';
+        const extMatch = fileName.match(/\.([^\.]+)$/);
+        return extMatch ? extMatch[1].toUpperCase() : '';
     }
 
     // 工具函数：格式化日期
     function formatDate(dateString) {
-      if (!dateString) return '';
+        if (!dateString) return '';
 
-      const date = new Date(dateString);
-      return date.toLocaleString();
+        const date = new Date(dateString);
+        return date.toLocaleString();
     }
 
     // 工具函数：格式化时间
     function formatTime(date) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
     }
 
     // 工具函数：生成会话ID
     function generateSessionId() {
-      return 'session_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+        return 'session_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
     }
 
     // 工具函数：获取知识图谱状态标签
     function getKGStatusBadge(status) {
-      switch (status) {
-        case 'completed':
-          return { badgeClass: 'bg-success/10 text-success', statusText: '已完成' };
-        case 'processing':
-          return { badgeClass: 'bg-warning/10 text-warning', statusText: '处理中' };
-        case 'failed':
-          return { badgeClass: 'bg-danger/10 text-danger', statusText: '失败' };
-        case 'pending':
-          return { badgeClass: 'bg-gray-100 text-gray-700', statusText: '等待中' };
-        default:
-          return { badgeClass: 'bg-primary/10 text-primary', statusText: '未知' };
-      }
+        switch (status) {
+            case 'completed':
+                return {badgeClass: 'bg-success/10 text-success', statusText: '已完成'};
+            case 'processing':
+                return {badgeClass: 'bg-warning/10 text-warning', statusText: '处理中'};
+            case 'failed':
+                return {badgeClass: 'bg-danger/10 text-danger', statusText: '失败'};
+            case 'pending':
+                return {badgeClass: 'bg-gray-100 text-gray-700', statusText: '等待中'};
+            default:
+                return {badgeClass: 'bg-primary/10 text-primary', statusText: '未知'};
+        }
     }
-  </script>
+</script>
 </body>
 </html>

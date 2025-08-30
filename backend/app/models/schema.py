@@ -13,7 +13,7 @@ class UserCreate(BaseModel):
 
 class UserResponse(BaseModel):
     """用户信息响应模型"""
-    id: str = Field(description="用户ID")
+    id: int = Field(description="用户ID")
     username: str = Field(description="用户名")
     email: EmailStr = Field(description="电子邮箱")
     full_name: Optional[str] = Field(default=None, description="全名")
@@ -32,40 +32,49 @@ class TokenPayload(BaseModel):
 
 
 class QAQuery(BaseModel):
-    """问答查询请求模型"""
-    kg_id: str = Field(description="知识图谱ID")
-    question: str = Field(description="用户的问题")
-    top_k: int = Field(default=5, ge=1, le=20, description="返回相关实体/关系的数量")
-    use_context: bool = Field(default=True, description="是否使用上下文信息")
-    session_id: Optional[str] = Field(default=None, description="会话ID，用于多轮对话")
+    """问答请求的 Query 模型（嵌套在 history 中）"""
+    kg_id: Optional[str] = None
+    question: str
+    top_k: int = 5  # 已添加默认值
+    use_context: bool = True  # 已添加默认值
+    session_id: Optional[str] = None
+    # 关键：添加 model_api_key 字段（与接口调用一致，允许为 None）
+    model_api_key: Optional[str] = None
+
+    class Config:
+        from_attributes = True  # 保持 Pydantic V2 兼容性
 
 class QAAnswer(BaseModel):
-    """问答回答响应模型"""
-    kg_id: str
+    """问答响应的 Answer 模型（嵌套在 history 中）"""
+    kg_id: Optional[str]  # 关键：改为 Optional[str]，允许 None
     question: str
-    answer: str = Field(description="问题的答案")
-    confidence: float = Field(default=0.0, ge=0.0, le=1.0, description="答案的置信度")
-    related_entities: Optional[List[Dict]] = Field(default=None, description="相关实体列表")
-    related_relations: Optional[List[Dict]] = Field(default=None, description="相关关系列表")
-    reasoning_steps: Optional[List[str]] = Field(default=None, description="推理步骤")
-    response_time: float = Field(description="响应时间（秒）")
-    session_id: Optional[str] = Field(default=None, description="会话ID")
-    timestamp: datetime = Field(default_factory=datetime.now, description="回答生成时间")
+    answer: str
+    confidence: float
+    related_entities: List[Dict]
+    related_relations: List[Dict]
+    reasoning_steps: List[str]
+    response_time: int
+    session_id: Optional[str]  # 允许 None
+    timestamp: str
 
 class QAHistoryItem(BaseModel):
-    """问答历史项模型"""
-    query: QAQuery
-    answer: QAAnswer
-    timestamp: datetime = Field(default_factory=datetime.now)
+    """单个问答历史项（嵌套在 history 列表中）"""
+    query: QAQuery  # 依赖上述修改后的 QAQuery
+    answer: QAAnswer  # 依赖上述修改后的 QAAnswer
+    timestamp: str
 
 class QAHistoryResponse(BaseModel):
-    """问答历史响应模型"""
-    kg_id: str
-    session_id: str
-    history: List[QAHistoryItem] = Field(default_factory=list, description="问答历史列表")
-    total: int = Field(description="历史记录总数")
-    page: int = Field(default=1, description="当前页码")
-    page_size: int = Field(default=20, description="每页记录数")
+    """问答历史的顶层响应模型"""
+    kg_id: Optional[str]  # 关键：改为 Optional[str]，允许 None（未传 kg_id 时）
+    session_id: Optional[str]  # 允许 None（无会话时）
+    history: List[QAHistoryItem]  # 依赖上述修改后的 QAHistoryItem
+    total: int
+    page: int
+    page_size: int
+
+    class Config:
+        from_attributes = True
+
 
 class KGQueryResponse(BaseModel):
     """知识图谱查询响应模型"""
@@ -98,21 +107,6 @@ class KGCreateResponse(BaseModel):
     start_time: datetime = Field(default_factory=datetime.now)
     estimated_time: Optional[int] = None  # 预计完成时间（秒）
 
-# 确保其他模型定义如下（保持不变）：
-class FileInfo(BaseModel):
-    """文件信息模型"""
-    file_id: str
-    file_name: str
-    file_size: int
-    file_type: str
-    upload_time: datetime = Field(default_factory=datetime.now)
-
-class UploadFileResponse(BaseModel):
-    """文件上传响应模型"""
-    success: bool
-    file_id: Optional[str] = None
-    message: Optional[str] = None
-    file_info: Optional[FileInfo] = None
 
 class FileInfo(BaseModel):
     """文件信息模型"""
@@ -128,6 +122,7 @@ class UploadFileResponse(BaseModel):
     file_id: Optional[str] = None
     message: Optional[str] = None
     file_info: Optional[FileInfo] = None
+
 
 class AlgorithmConfig(BaseModel):
     """算法配置模型"""
@@ -198,3 +193,26 @@ class QAResponse(BaseModel):
     related_relations: Optional[List[RelationSchema]] = None
     confidence: float = Field(default=0.0)
     reasoning_steps: Optional[List[str]] = None
+
+# 补充缺失的知识图谱列表相关模型
+class KnowledgeGraphInfo(BaseModel):
+    """知识图谱基本信息模型（用于列表展示）"""
+    kg_id: str = Field(description="知识图谱ID")  # 改为 kg_id
+    name: str = Field(description="知识图谱名称")
+    entity_count: int = Field(default=0, description="实体数量")
+    relation_count: int = Field(default=0, description="关系数量")
+    create_time: datetime = Field(description="创建时间")
+    status: str = Field(default="completed", description="图谱状态")# 图谱状态
+
+class KGListResponse(BaseModel):
+    """知识图谱列表响应模型"""
+    graphs: List[KnowledgeGraphInfo]
+    total: int
+    page: int
+    page_size: int
+    """
+    分页说明：
+    - total: 总记录数
+    - page: 当前页码
+    - page_size: 每页记录数
+    """

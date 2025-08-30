@@ -1,8 +1,9 @@
-import json
 import logging
-from typing import List, Dict, Tuple
+from typing import List, Dict
+
 import torch
 from transformers import BertTokenizer, BertForTokenClassification
+
 from app.algorithm.extraction.base import EntityExtractionStrategy
 
 logger = logging.getLogger(__name__)

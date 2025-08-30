@@ -12,7 +12,6 @@ def init_db():
         # 创建所有模型对应的表
         Base.metadata.create_all(bind=engine)
         logger.info("数据库表结构创建成功")
-        print("数据库表结构创建成功")
     except Exception as e:
         logger.error(f"数据库表结构创建失败: {str(e)}")
         print(f"数据库表结构创建失败: {str(e)}")

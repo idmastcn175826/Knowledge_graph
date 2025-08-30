@@ -18,6 +18,6 @@ from .schema import (
     QAHistoryItem,
     QAHistoryResponse
 )
-from .user import User
+# from .user import User
 from .file import File
 from .task import Task

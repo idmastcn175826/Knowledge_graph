@@ -1,10 +1,8 @@
-from typing import List, Dict, Set, Tuple
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
-import string
-from fuzzywuzzy import fuzz
 import logging
-from app.algorithm.extraction.base import EntityExtractionStrategy
+import string
+from typing import List, Dict, Tuple
+
+from fuzzywuzzy import fuzz
 
 logger = logging.getLogger(__name__)
 
