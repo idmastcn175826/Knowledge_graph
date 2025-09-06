@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 
 # 从路由目录导入所有路由
-from app.api.v1.routers import (user, file, knowledge_graph, qa, data_router,sql_router)
+from app.api.v1.routers import (user, file, knowledge_graph, qa, data_router,sql_router,health_agent_router)
 from app.api.v1.routers import rag
 from app.config.config import settings
 from app.utils.exceptions import APIException
@@ -100,6 +100,7 @@ app.include_router(qa.router, prefix=f"{settings.api_prefix}/qa", tags=["问答�
 app.include_router(data_router.router, prefix=f"{settings.api_prefix}/convert", tags=["微调数据集转换"])
 app.include_router(sql_router.router, prefix=f"{settings.api_prefix}/dataset", tags=["数据库查询"])
 app.include_router(rag.router, prefix=f"{settings.api_prefix}/rag", tags=["RAG系统"])
+app.include_router(health_agent_router.router, prefix=f"{settings.api_prefix}/health", tags=["健康监测agent"])
 
 
 # 根路径路由

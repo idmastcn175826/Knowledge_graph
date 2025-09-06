@@ -216,3 +216,13 @@ class KGListResponse(BaseModel):
     - page: 当前页码
     - page_size: 每页记录数
     """
+
+
+class FileCreate:
+    pass
+
+class TaskCreate:
+    pass
+
+class TaskProgressUpdate:
+    pass

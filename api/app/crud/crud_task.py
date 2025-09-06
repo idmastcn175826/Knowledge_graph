@@ -2,8 +2,7 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.models.task import Task  # ORM模型
-from app.models.schema import TaskCreate, TaskProgressUpdate  # Pydantic模型
-
+from app.models.schema import TaskCreate, TaskProgressUpdate
 
 def create_task(db: Session, task_in: TaskCreate, user_id: int) -> Task:
     """创建知识图谱构建任务记录"""

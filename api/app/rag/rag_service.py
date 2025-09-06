@@ -2,9 +2,7 @@ import logging
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from app.rag.rag_models import RAGCollection, RAGDocument
-# from app.services.vector_store import VectorStoreService
-# from app.services.embedding_service import EmbeddingService
+from app.models.rag_models import RAGCollection, RAGDocument
 from app.rag.file_processor import FileProcessor
 from app.rag.vector_store import VectorStoreService
 from app.utils.exceptions import RAGException

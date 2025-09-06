@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/vis-network.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Tailwind配置 -->
     <script>
@@ -218,6 +219,12 @@
                     <a href="#data" class="nav-item" data-view="data-view">
                         <i class="fa fa-wrench w-5 text-center"></i>
                         <span>微调数据制作</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#health" class="nav-item" data-view="health-view">
+                        <i class="fa fa-wrench w-5 text-center"></i>
+                        <span>监测智能体</span>
                     </a>
                 </li>
             </ul>
@@ -1115,7 +1122,7 @@
                     </div>
                 </div>
 
-<!--                //-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+                <!--                //-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
 
                 <!-- JSON转换表单 -->
                 <div id="json-convert-form" class="space-y-4 hidden">
@@ -1150,7 +1157,7 @@
                         <span>转换JSON文件</span>
                     </button>
                 </div>
-<!--                //&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+                <!--                //&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- 左侧：转换配置 -->
@@ -1280,6 +1287,169 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+
+            <!-- 在现有HTML中添加健康监测视图 -->
+            <div id="health-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">健康监测</h2>
+                        <p class="text-gray-500">实时监测健康状况，紧急情况下自动求助</p>
+                    </div>
+                    <button class="btn btn-primary" id="add-health-device">
+                        <i class="fa fa-plus"></i>
+                        <span>添加健康设备</span>
+                    </button>
+                </div>
+
+                <!-- 健康数据仪表盘 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">当前心率</p>
+                                <h3 class="text-3xl font-bold mt-1" id="current-heart-rate">--</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-danger/10 flex items-center justify-center text-danger">
+                                <i class="fa fa-heartbeat text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">上次更新: <span id="heart-rate-time">--</span></div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">血氧饱和度</p>
+                                <h3 class="text-3xl font-bold mt-1" id="current-blood-oxygen">--</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-lungs text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">上次更新: <span id="blood-oxygen-time">--</span></div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">血压</p>
+                                <h3 class="text-3xl font-bold mt-1" id="current-blood-pressure">--/--</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                                <i class="fa fa-tint text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">上次更新: <span id="blood-pressure-time">--</span></div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">状态</p>
+                                <h3 class="text-3xl font-bold mt-1" id="health-status">正常</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                                <i class="fa fa-check-circle text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">持续监测中</div>
+                    </div>
+                </div>
+
+                <!-- 紧急求助面板 -->
+                <div class="card p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">紧急求助</h3>
+                        <button class="btn btn-outline" id="test-emergency-btn">
+                            <i class="fa fa-bell"></i>
+                            <span>测试紧急求助</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="border border-gray-100 rounded-lg p-4 text-center">
+                            <div class="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                                <i class="fa fa-user-friends text-2xl"></i>
+                            </div>
+                            <h4 class="font-medium mb-1">紧急联系人</h4>
+                            <p class="text-sm text-gray-500 mb-3">已设置 <span id="emergency-contacts-count">0</span>
+                                位联系人</p>
+                            <button class="btn btn-outline text-sm w-full" id="manage-contacts-btn">
+                                <i class="fa fa-cog"></i>
+                                <span>管理联系人</span>
+                            </button>
+                        </div>
+
+                        <div class="border border-gray-100 rounded-lg p-4 text-center">
+                            <div class="w-16 h-16 mx-auto rounded-full bg-success/10 flex items-center justify-center text-success mb-3">
+                                <i class="fa fa-ambulance text-2xl"></i>
+                            </div>
+                            <h4 class="font-medium mb-1">急救中心</h4>
+                            <p class="text-sm text-gray-500 mb-3">紧急情况下自动呼叫</p>
+                            <button class="btn btn-outline text-sm w-full" id="emergency-settings-btn">
+                                <i class="fa fa-sliders"></i>
+                                <span>设置</span>
+                            </button>
+                        </div>
+
+                        <div class="border border-gray-100 rounded-lg p-4 text-center">
+                            <div class="w-16 h-16 mx-auto rounded-full bg-accent/10 flex items-center justify-center text-accent mb-3">
+                                <i class="fa fa-hospital text-2xl"></i>
+                            </div>
+                            <h4 class="font-medium mb-1">医疗机构</h4>
+                            <p class="text-sm text-gray-500 mb-3">已关联 <span id="linked-hospitals-count">0</span> 家医院
+                            </p>
+                            <button class="btn btn-outline text-sm w-full" id="link-hospital-btn">
+                                <i class="fa fa-link"></i>
+                                <span>关联医院</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 紧急求助按钮 -->
+                    <div class="mt-6 text-center">
+                        <button id="emergency-button"
+                                class="w-32 h-32 rounded-full bg-danger hover:bg-danger/90 text-white flex flex-col items-center justify-center">
+                            <i class="fa fa-bell text-3xl mb-2"></i>
+                            <span class="font-bold">紧急求助</span>
+                        </button>
+                        <p class="text-sm text-gray-500 mt-3">长按3秒或连续点击3次触发紧急求助</p>
+                    </div>
+                </div>
+
+                <!-- 健康数据历史 -->
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">健康数据历史</h3>
+                        <div class="flex gap-2">
+                            <select id="health-data-type" class="input">
+                                <option value="all">所有数据</option>
+                                <option value="heart_rate">心率</option>
+                                <option value="blood_oxygen">血氧</option>
+                                <option value="blood_pressure">血压</option>
+                                <option value="glucose">血糖</option>
+                            </select>
+                            <select id="health-data-range" class="input">
+                                <option value="today">今天</option>
+                                <option value="week" selected>近一周</option>
+                                <option value="month">近一个月</option>
+                                <option value="year">近一年</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="h-80">
+                        <canvas id="health-data-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 紧急联系人管理模态框 -->
+            <div id="emergency-contacts-modal"
+                 class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+                <!-- 模态框内容 -->
             </div>
 
 
@@ -1529,6 +1699,9 @@
         pageSize: 20,
         dbConnections: {}, // 存储数据库连接信息
         currentConnection: null, // 当前活动的数据库连接
+        // 健康监测相关状态
+        latestHealthData: null,
+        healthChart: null
 
     };
 
@@ -1544,10 +1717,15 @@
 
         // 初始化事件监听
         initEventListeners();
+        // 新增：健康监测模块初始化
+        initHealthMonitoring();
 
         // 更新当前时间
         updateCurrentTime();
         setInterval(updateCurrentTime, 60000);
+
+        // 新增：初始化紧急联系人模态框
+        initEmergencyContactsModal();
     });
 
     // 初始化事件监听
@@ -1680,67 +1858,357 @@
         document.getElementById('json-convert-btn').addEventListener('click', handleJsonConvert);
 
 
-    }
-    //json
-    // 添加JSON转换功能
-async function handleJsonConvert() {
-  const fileId = document.getElementById('json-file-select').value;
-  const structureType = document.getElementById('json-structure-type').value;
-  const outputPath = document.getElementById('json-output-path').value;
+        // 获取健康数据健康检测智能体
+        fetchHealthData();
+        // 获取紧急联系人
+        fetchEmergencyContacts();
+        // 设置健康数据轮询
+        setInterval(fetchHealthData, 60000); // 每分钟更新一次
+        // 设置紧急按钮事件
+        setupEmergencyButton();
+        // 初始化健康图表
+        initHealthChart();
+        // 添加事件监听
+        document.getElementById('manage-contacts-btn').addEventListener('click', showEmergencyContactsModal);
+        document.getElementById('save-contact').addEventListener('click', saveEmergencyContact);
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('emergency-contacts-modal').classList.add('hidden');
+            });
+        });
+        // 更新健康状态
+        updateHealthStatus(latestData);
 
-  if (!fileId || !outputPath) {
-    alert('请选择JSON文件并指定输出路径');
-    return;
-  }
 
-  try {
-    showProgressModal('JSON转换', '正在处理JSON文件，请稍候...');
-
-    const file = state.files.find(f => f.file_id === fileId);
-    if (!file) {
-      throw new Error('选择的文件不存在');
-    }
-
-    // 构建请求数据
-    const requestData = {
-      source_type: 'file',
-      source_info: {
-        path: file.file_path || file.file_name,
-        format: 'json'
-      },
-      output_path: outputPath
-    };
-
-    // 如果是自定义格式，添加字段映射
-    if (structureType === 'custom') {
-      const fieldMapping = document.getElementById('json-field-mapping').value;
-      try {
-        const mapping = JSON.parse(fieldMapping);
-        requestData.source_info.field_mapping = mapping;
-      } catch (e) {
-        throw new Error('字段映射格式错误，必须是有效的JSON');
-      }
     }
 
-    // 调用转换API
-    const response = await fetch(`${API_BASE_URL}/api/v1/convert/convert`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.token}`
-      },
-      body: JSON.stringify(requestData)
-    });
+    // 健康监测API基础地址
+    const HEALTH_API_BASE = `${API_BASE_URL}/api/v1/health`;
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'JSON转换失败');
+    // 修改获取健康数据的函数
+    async function fetchHealthData() {
+        try {
+            const response = await fetch(`${HEALTH_API_BASE}/health-data?limit=10`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
+
+            if (response.ok) {
+                const healthData = await response.json();
+                state.healthData = healthData;
+
+                if (healthData.length > 0) {
+                    state.latestHealthData = healthData[healthData.length - 1];
+                    updateHealthDashboard(state.latestHealthData);
+                    analyzeHealthData(state.latestHealthData);
+                } else {
+                    // 如果没有数据，生成模拟数据
+                    generateMockHealthData();
+                }
+
+                updateHealthChart();
+            } else {
+                console.warn('获取健康数据失败，使用模拟数据');
+                generateMockHealthData();
+            }
+        } catch (error) {
+            console.error('获取健康数据失败:', error);
+            generateMockHealthData();
+        }
     }
 
-    const result = await response.json();
+    // 修改获取紧急联系人的函数
+    async function fetchEmergencyContacts() {
+        try {
+            const response = await fetch(`${HEALTH_API_BASE}/emergency-contacts`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
 
-    // 显示转换结果
-    document.getElementById('convert-result').innerHTML = `
+            if (response.ok) {
+                const contacts = await response.json();
+                state.emergencyContacts = contacts;
+                document.getElementById('emergency-contacts-count').textContent = contacts.length;
+                updateEmergencyContactsList(contacts);
+            } else {
+                console.warn('获取紧急联系人失败，使用模拟数据');
+                generateMockEmergencyContacts();
+            }
+        } catch (error) {
+            console.error('获取紧急联系人失败:', error);
+            generateMockEmergencyContacts();
+        }
+    }
+
+    // 上传健康数据到后端
+    async function uploadHealthData(healthData) {
+        try {
+            const response = await fetch(`${HEALTH_API_BASE}/health-data`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}`
+                },
+                body: JSON.stringify(healthData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('健康数据上传成功:', result);
+                // 重新获取数据更新界面
+                fetchHealthData();
+                return result;
+            } else {
+                throw new Error('健康数据上传失败');
+            }
+        } catch (error) {
+            console.error('上传健康数据失败:', error);
+            return null;
+        }
+    }
+
+    // 触发紧急事件
+    async function triggerEmergency() {
+        if (confirm('确定要触发紧急求助吗？')) {
+            try {
+                const emergencyData = {
+                    risk_level: 'critical',
+                    type: 'manual',
+                    description: '用户手动触发紧急求助',
+                    health_data_id: state.latestHealthData?.id || null
+                };
+
+                const response = await fetch(`${HEALTH_API_BASE}/emergency`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.token}`
+                    },
+                    body: JSON.stringify(emergencyData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('已触发紧急求助，帮助正在路上！');
+                    console.log('紧急事件触发成功:', result);
+                } else {
+                    throw new Error('求助请求失败');
+                }
+            } catch (error) {
+                console.error('触发紧急求助失败:', error);
+                alert('触发紧急求助失败，请检查网络连接');
+            }
+        }
+    }
+
+    // 保存紧急联系人
+    async function saveEmergencyContact() {
+        const name = document.getElementById('contact-name').value;
+        const relationship = document.getElementById('contact-relationship').value;
+        const phone = document.getElementById('contact-phone').value;
+        const email = document.getElementById('contact-email').value;
+        const priority = document.getElementById('contact-priority').value;
+
+        if (!name || !relationship || !phone) {
+            alert('请填写必填字段（姓名、关系、电话）');
+            return;
+        }
+
+        try {
+            const contactData = {
+                name,
+                contact_relationship: relationship,
+                phone_number: phone,
+                email: email || '',
+                priority: parseInt(priority) || 1
+            };
+
+            const response = await fetch(`${HEALTH_API_BASE}/emergency-contacts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}`
+                },
+                body: JSON.stringify(contactData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                alert('联系人保存成功！');
+                document.getElementById('emergency-contacts-modal').classList.add('hidden');
+                fetchEmergencyContacts(); // 刷新联系人列表
+                console.log('联系人保存成功:', result);
+            } else {
+                throw new Error('保存联系人失败');
+            }
+        } catch (error) {
+            console.error('保存紧急联系人失败:', error);
+            alert('保存失败: ' + error.message);
+        }
+    }
+
+    // 模拟健康设备数据生成
+    function simulateHealthDevice() {
+        const mockData = {
+            device_id: 'simulated_watch_001',
+            device_type: 'smart_watch',
+            heart_rate: Math.floor(60 + Math.random() * 40),
+            blood_oxygen: Math.floor(95 + Math.random() * 5),
+            systolic_bp: Math.floor(110 + Math.random() * 30),
+            diastolic_bp: Math.floor(70 + Math.random() * 20),
+            blood_glucose: (5.0 + (Math.random() * 3)).toFixed(1),
+            temperature: (36.5 + (Math.random() * 1.5)).toFixed(1),
+            respiratory_rate: Math.floor(12 + Math.random() * 8),
+            steps: Math.floor(Math.random() * 1000),
+            calories: Math.floor(Math.random() * 500),
+            distance: (Math.random() * 5).toFixed(2),
+            latitude: 39.9042 + (Math.random() * 0.1 - 0.05),
+            longitude: 116.4074 + (Math.random() * 0.1 - 0.05),
+            altitude: 50 + Math.random() * 100,
+            environment_temp: 20 + Math.random() * 15,
+            environment_humidity: 30 + Math.random() * 50,
+            timestamp: new Date().toISOString()
+        };
+
+        // 上传模拟数据
+        uploadHealthData(mockData);
+    }
+
+    // 更新健康数据仪表盘
+    function updateHealthDashboard(data) {
+        if (data.heart_rate !== undefined && data.heart_rate !== null) {
+            document.getElementById('current-heart-rate').textContent = data.heart_rate;
+            document.getElementById('heart-rate-time').textContent = new Date().toLocaleTimeString();
+        }
+
+        if (data.blood_oxygen !== undefined && data.blood_oxygen !== null) {
+            document.getElementById('current-blood-oxygen').textContent = data.blood_oxygen + '%';
+            document.getElementById('blood-oxygen-time').textContent = new Date().toLocaleTimeString();
+        }
+
+        if (data.systolic_bp !== undefined && data.diastolic_bp !== undefined) {
+            document.getElementById('current-blood-pressure').textContent =
+                `${data.systolic_bp}/${data.diastolic_bp}`;
+            document.getElementById('blood-pressure-time').textContent = new Date().toLocaleTimeString();
+        }
+    }
+
+    // 初始化健康监测
+    function initHealthMonitoring() {
+        console.log('初始化健康监测...');
+
+        // 获取健康数据
+        fetchHealthData();
+
+        // 获取紧急联系人
+        fetchEmergencyContacts();
+
+        // 设置健康数据轮询（每30秒）
+        setInterval(fetchHealthData, 30000);
+
+        // 初始化健康图表
+        initHealthChart();
+
+        // 自动模拟健康设备数据（演示用，每分钟一次）
+        setTimeout(simulateHealthDevice, 2000);
+        setInterval(simulateHealthDevice, 60000);
+    }
+
+    // 在用户登录后初始化健康监测
+    async function fetchCurrentUser() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/user/me`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                state.currentUser = user;
+
+                // 更新UI
+                document.getElementById('current-username').textContent = user.username;
+
+                // 隐藏登录模态框，显示应用
+                document.getElementById('auth-modal').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+
+                // 加载初始数据
+                fetchDashboardStats();
+                fetchFiles();
+                fetchKnowledgeGraphs();
+
+                // 初始化健康监测
+                initHealthMonitoring();
+            }
+        } catch (error) {
+            console.error('获取用户信息失败:', error);
+            handleLogout();
+        }
+    }
+
+    // 添加JSON转换功能++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    async function handleJsonConvert() {
+        const fileId = document.getElementById('json-file-select').value;
+        const structureType = document.getElementById('json-structure-type').value;
+        const outputPath = document.getElementById('json-output-path').value;
+
+        if (!fileId || !outputPath) {
+            alert('请选择JSON文件并指定输出路径');
+            return;
+        }
+
+        try {
+            showProgressModal('JSON转换', '正在处理JSON文件，请稍候...');
+
+            const file = state.files.find(f => f.file_id === fileId);
+            if (!file) {
+                throw new Error('选择的文件不存在');
+            }
+
+            // 构建请求数据
+            const requestData = {
+                source_type: 'file',
+                source_info: {
+                    path: file.file_path || file.file_name,
+                    format: 'json'
+                },
+                output_path: outputPath
+            };
+
+            // 如果是自定义格式，添加字段映射
+            if (structureType === 'custom') {
+                const fieldMapping = document.getElementById('json-field-mapping').value;
+                try {
+                    const mapping = JSON.parse(fieldMapping);
+                    requestData.source_info.field_mapping = mapping;
+                } catch (e) {
+                    throw new Error('字段映射格式错误，必须是有效的JSON');
+                }
+            }
+
+            // 调用转换API
+            const response = await fetch(`${API_BASE_URL}/api/v1/convert/convert`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}`
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'JSON转换失败');
+            }
+
+            const result = await response.json();
+
+            // 显示转换结果
+            document.getElementById('convert-result').innerHTML = `
       <div class="p-4 bg-success/10 text-success rounded-lg">
         <div class="flex items-center justify-between mb-2">
           <span class="font-medium">JSON转换成功</span>
@@ -1754,19 +2222,19 @@ async function handleJsonConvert() {
       </div>
     `;
 
-    // 添加转换历史
-    addConvertHistory('json', outputPath, result.converted_count);
+            // 添加转换历史
+            addConvertHistory('json', outputPath, result.converted_count);
 
-    hideProgressModal();
-    alert('JSON文件转换成功！');
+            hideProgressModal();
+            alert('JSON文件转换成功！');
 
-  } catch (error) {
-    console.error('JSON转换失败:', error);
-    hideProgressModal();
-    alert('JSON转换失败: ' + error.message);
+        } catch (error) {
+            console.error('JSON转换失败:', error);
+            hideProgressModal();
+            alert('JSON转换失败: ' + error.message);
 
-    // 显示错误信息
-    document.getElementById('convert-result').innerHTML = `
+            // 显示错误信息
+            document.getElementById('convert-result').innerHTML = `
       <div class="p-4 bg-danger/10 text-danger rounded-lg">
         <div class="flex items-center justify-between mb-2">
           <span class="font-medium">JSON转换失败</span>
@@ -1775,8 +2243,8 @@ async function handleJsonConvert() {
         <p class="text-sm">${error.message}</p>
       </div>
     `;
-  }
-}
+        }
+    }
 
 
     //======================================================================================================================================

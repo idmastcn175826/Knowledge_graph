@@ -41,8 +41,14 @@ class Settings(BaseSettings):
     QWEN_MODEL_NAME: str = Field(default_factory=lambda: os.getenv("QWEN_MODEL_NAME", ""),alias="QWEN_MODEL_NAME")
     QWEN_DEFAULT_API_KEY: Optional[str] = Field(default_factory=lambda: os.getenv("QWEN_DEFAULT_API_KEY"),alias="QWEN_DEFAULT_API_KEY")
     QWEN_API_BASE_URL: str = Field(default_factory=lambda: os.getenv("QWEN_API_BASE_URL", ""),alias="QWEN_API_BASE_URL")
+    QWEN_TEMPERATURE = float(os.getenv("QWEN_TEMPERATURE", "0.7"))
 
-    # CORS配置
+    #智能体配置
+    MAX_SHORT_TERM_MEMORY = int(os.getenv("MAX_SHORT_TERM_MEMORY", "100"))
+
+
+
+    # CORS配置跨域
     cors_origins: List[str] = Field(
         default_factory=lambda: os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(","),
         alias="CORS_ORIGINS")
