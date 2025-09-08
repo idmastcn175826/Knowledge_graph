@@ -9,7 +9,9 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 
 # 从路由目录导入所有路由
-from app.api.v1.routers import (user, file, knowledge_graph, qa, data_router,sql_router,health_agent_router)
+from app.api.v1.routers import (user, file, knowledge_graph, qa, data_router,
+                                sql_router, health_agent_router, agent_router,
+                                system_router)  # 新增导入system_router
 from app.api.v1.routers import rag
 from app.config.config import settings
 from app.utils.exceptions import APIException
@@ -19,7 +21,7 @@ from app.db.init_db import init_db
 log_dir = Path(settings.log_dir)
 log_dir.mkdir(parents=True, exist_ok=True)
 
-# 配置日志
+# 配置日志（保持不变）
 logging.basicConfig(
     level=settings.log_level,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -34,7 +36,7 @@ logging.basicConfig(
     ]
 )
 
-# 模块专用日志器
+# 模块专用日志器（保持不变）
 file_parser_logger = logging.getLogger("file_parser")
 file_parser_logger.addHandler(
     RotatingFileHandler(
@@ -80,7 +82,7 @@ app = FastAPI(
     lifespan=lifespan  # 使用新的生命周期管理
 )
 
-# 配置CORS
+# 配置CORS（保持不变）
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
@@ -89,7 +91,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 挂载静态文件目录
+# 挂载静态文件目录（保持不变）
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
 
 # 注册所有路由
@@ -101,9 +103,11 @@ app.include_router(data_router.router, prefix=f"{settings.api_prefix}/convert", 
 app.include_router(sql_router.router, prefix=f"{settings.api_prefix}/dataset", tags=["数据库查询"])
 app.include_router(rag.router, prefix=f"{settings.api_prefix}/rag", tags=["RAG系统"])
 app.include_router(health_agent_router.router, prefix=f"{settings.api_prefix}/health", tags=["健康监测agent"])
+app.include_router(agent_router.router, prefix=f"{settings.api_prefix}/agent", tags=["智能体"])
+app.include_router(system_router.router, prefix=f"{settings.api_prefix}/system", tags=["系统管理"])
 
 
-# 根路径路由
+# 根路径路由（保持不变）
 @app.get("/", include_in_schema=False)
 async def read_root():
     frontend_index = Path("frontend/index.html")
@@ -116,7 +120,7 @@ async def read_root():
     }
 
 
-# 全局异常处理
+# 全局异常处理（保持不变）
 @app.exception_handler(APIException)
 async def api_exception_handler(request: Request, exc: APIException):
     logger.error(f"API异常: {exc.detail} (代码: {exc.code})")

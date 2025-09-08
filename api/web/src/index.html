@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI应用系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/vis-network.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        accent: '#722ED1',
+                        success: '#52C41A',
+                        warning: '#FAAD14',
+                        danger: '#FF4D4F',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+
+            .nav-item {
+                @apply flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-primary/10;
+            }
+
+            .nav-item.active {
+                @apply bg-primary/10 text-primary font-medium border-l-4 border-primary;
+            }
+
+            .card {
+                @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md;
+            }
+
+            .btn {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2;
+            }
+
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90 active:bg-primary/80;
+            }
+
+            .btn-outline {
+                @apply border border-gray-200 hover:border-primary hover:text-primary;
+            }
+
+            .input {
+                @apply w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all;
+            }
+
+            .badge {
+                @apply px-2 py-1 text-xs rounded-full font-medium;
+            }
+
+            .form-label {
+                @apply block text-sm font-medium text-gray-700 mb-1;
+            }
+
+            .progress-bar {
+                @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+            }
+
+            .progress-fill {
+                @apply h-full bg-primary transition-all duration-500;
+            }
+
+            .chat-bubble-user {
+                @apply bg-white p-4 rounded-lg rounded-tl-none shadow-sm border border-gray-100 max-w-[80%] self-start;
+            }
+
+            .chat-bubble-ai {
+                @apply bg-primary/5 p-4 rounded-lg rounded-tr-none shadow-sm border border-primary/10 max-w-[80%] self-end;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-inter bg-gray-50 text-gray-800 min-h-screen">
+<!-- 登录/注册模态框 (默认显示) -->
+<div id="auth-modal" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+    <div class="w-full max-w-md p-6">
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <i class="fa fa-sitemap text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold">多功能AI应用系统</h2>
+            <p class="text-gray-500 mt-2">基于Qwen模型、FastAPI和Neo4j的智能系统</p>
+        </div>
+
+        <!-- 登录表单 -->
+        <div id="login-form" class="space-y-4">
+            <div id="login-alert" class="hidden p-3 bg-danger/10 text-danger rounded-lg text-sm"></div>
+
+            <div>
+                <label class="form-label">用户名</label>
+                <input type="text" id="login-username" class="input" placeholder="请输入用户名" required>
+            </div>
+            <div>
+                <label class="form-label">密码</label>
+                <input type="password" id="login-password" class="input" placeholder="请输入密码" required>
+            </div>
+            <button id="login-btn" class="btn btn-primary w-full">
+                <i class="fa fa-sign-in"></i>
+                <span>登录</span>
+            </button>
+            <div class="text-center text-sm text-gray-500">
+                还没有账号？<a href="javascript:;" id="show-register" class="text-primary hover:underline">立即注册</a>
+            </div>
+        </div>
+
+        <!-- 注册表单 (默认隐藏) -->
+        <div id="register-form" class="space-y-4 hidden">
+            <div id="register-alert" class="hidden p-3 bg-danger/10 text-danger rounded-lg text-sm"></div>
+
+            <div>
+                <label class="form-label">用户名</label>
+                <input type="text" id="register-username" class="input" placeholder="请输入用户名" required>
+            </div>
+            <div>
+                <label class="form-label">电子邮箱</label>
+                <input type="email" id="register-email" class="input" placeholder="请输入电子邮箱" required>
+            </div>
+            <div>
+                <label class="form-label">密码</label>
+                <input type="password" id="register-password" class="input" placeholder="请输入密码" required>
+            </div>
+            <div>
+                <label class="form-label">全名 (可选)</label>
+                <input type="text" id="register-fullname" class="input" placeholder="请输入您的全名">
+            </div>
+            <button id="register-btn" class="btn btn-primary w-full">
+                <i class="fa fa-user-plus"></i>
+                <span>注册</span>
+            </button>
+            <div class="text-center text-sm text-gray-500">
+                已有账号？<a href="javascript:;" id="show-login" class="text-primary hover:underline">返回登录</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 主应用界面 (默认隐藏) -->
+<div id="app" class="flex h-screen overflow-hidden hidden">
+    <!-- 侧边导航 -->
+    <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-300">
+        <!-- 品牌标识 -->
+        <div class="p-5 border-b border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <i class="fa fa-sitemap text-xl"></i>
+                </div>
+                <h1 class="text-xl font-bold">AI应用系统</h1>
+            </div>
+        </div>
+
+        <!-- 导航菜单 -->
+        <nav class="flex-1 p-3 overflow-y-auto">
+            <ul class="space-y-1">
+                <li>
+                    <a href="#dashboard" class="nav-item active" data-view="dashboard-view">
+                        <i class="fa fa-dashboard w-5 text-center"></i>
+                        <span>仪表盘</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#file" class="nav-item" data-view="file-view">
+                        <i class="fa fa-file w-5 text-center"></i>
+                        <span>文件处理</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#knowledge-graph" class="nav-item" data-view="kg-view">
+                        <i class="fa-solid fa-braille w-5 text-center"></i>
+                        <span>知识图谱</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#qa" class="nav-item" data-view="qa-view">
+                        <i class="fa fa-comments w-5 text-center"></i>
+                        <span>问答对话</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#rag" class="nav-item" data-view="rag-view">
+                        <i class="fa fa-search w-5 text-center"></i>
+                        <span>RAG</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#mcp" class="nav-item" data-view="mcp-view">
+                        <i class="fa fa-cogs w-5 text-center"></i>
+                        <span>MCP</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#sql" class="nav-item" data-view="sql-view">
+                        <i class="fa fa-database w-5 text-center"></i>
+                        <span>数据库查询</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#data" class="nav-item" data-view="data-view">
+                        <i class="fa fa-wrench w-5 text-center"></i>
+                        <span>微调数据制作</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#health" class="nav-item" data-view="health-view">
+                        <i class="fa fa-wrench w-5 text-center"></i>
+                        <span>监测智能体</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#agent" class="nav-item" data-view="agent-view">
+                        <i class="fa fa-robot w-5 text-center"></i>
+                        <span>调用智能体</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- 用户信息 -->
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <i class="fa fa-user"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-sm" id="current-username">testuser</p>
+                    <p class="text-xs text-gray-500">普通用户</p>
+                </div>
+                <button id="logout-btn" class="ml-auto text-gray-400 hover:text-danger transition-colors">
+                    <i class="fa fa-sign-out"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <!-- 顶部导航 -->
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+            <div class="flex items-center gap-4">
+                <button id="mobile-menu-btn" class="lg:hidden text-gray-500 hover:text-primary">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+                <div class="relative hidden md:block">
+                    <input type="text" placeholder="搜索..."
+                           class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-64">
+                    <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button class="relative p-2 text-gray-500 hover:text-primary rounded-full hover:bg-gray-100">
+                    <i class="fa fa-bell text-lg"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+                </button>
+                <div class="hidden md:block">
+                    <span class="text-sm text-gray-500 mr-2" id="current-time"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <!-- 仪表盘视图 -->
+            <div id="dashboard-view" class="view active">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">仪表盘</h2>
+                        <p class="text-gray-500">系统概览与数据统计</p>
+                    </div>
+                    <button class="btn btn-primary" id="create-kg-dashboard-btn">
+                        <i class="fa fa-plus"></i>
+                        <span>创建知识图谱</span>
+                    </button>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">知识图谱总数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="kg-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa-solid fa-braille text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">上传文件数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="file-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+                                <i class="fa fa-file text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">问答次数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="qa-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                                <i class="fa fa-comments text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">实体总数</p>
+                                <h3 class="text-3xl font-bold mt-1" id="entity-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                                <i class="fa fa-cubes text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">RAG</p>
+                                <h3 class="text-3xl font-bold mt-1" id="rag-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-search text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">MCP工具</p>
+                                <h3 class="text-3xl font-bold mt-1" id="mcp-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-list text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">数据库查询</p>
+                                <h3 class="text-3xl font-bold mt-1" id="sql-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-database text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">数据集制作</p>
+                                <h3 class="text-3xl font-bold mt-1" id="data-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-wrench text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center text-sm">
+                <span class="text-success flex items-center">
+                  <i class="fa fa-arrow-up mr-1"></i> 0%
+                </span>
+                            <span class="text-gray-500 ml-2">较上月</span>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- 最近知识图谱 -->
+                <div class="card p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">最近知识图谱</h3>
+                        <a href="#knowledge-graph" class="text-primary hover:underline text-sm font-medium nav-link"
+                           data-view="kg-view">查看全部</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-3 font-medium">名称</th>
+                                <th class="pb-3 font-medium">实体数</th>
+                                <th class="pb-3 font-medium">关系数</th>
+                                <th class="pb-3 font-medium">创建时间</th>
+                                <th class="pb-3 font-medium">状态</th>
+                                <th class="pb-3 font-medium">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="recent-kg-table">
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-gray-500">
+                                    <i class="fa fa-folder-open-o text-3xl mb-2"></i>
+                                    <p>暂无知识图谱数据</p>
+                                    <p class="text-sm mt-1">点击"创建知识图谱"开始构建您的第一个知识图谱</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 最近活动 -->
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">最近活动</h3>
+                    </div>
+                    <div id="recent-activities" class="space-y-4">
+                        <div class="animate-pulse flex items-start gap-4 pb-4 border-b border-gray-100">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                        <div class="animate-pulse flex items-start gap-4 pb-4 border-b border-gray-100">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                        <div class="animate-pulse flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="h-4 bg-gray-100 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文件处理视图 -->
+            <div id="file-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">文件处理</h2>
+                        <p class="text-gray-500">上传、管理和处理文件</p>
+                    </div>
+                    <button class="btn btn-primary" id="upload-file-btn">
+                        <i class="fa fa-upload"></i>
+                        <span>上传文件</span>
+                    </button>
+                </div>
+
+                <!-- 文件上传区域 -->
+                <div class="card p-6 mb-6">
+                    <div id="file-upload-area"
+                         class="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                        <i class="fa fa-cloud-upload text-4xl text-gray-400 mb-4"></i>
+                        <h3 class="text-lg font-medium mb-2">拖放文件到此处上传</h3>
+                        <p class="text-gray-500 mb-4">支持 PDF、TXT、DOCX 等格式文件</p>
+                        <label class="btn btn-outline inline-flex items-center cursor-pointer">
+                            <i class="fa fa-file"></i>
+                            <span>选择文件</span>
+                            <input type="file" id="file-input" class="hidden" multiple
+                                   accept=".txt,.pdf,.docx,.doc,.jpg,.png,.mp3,.mp4,.zip">
+                        </label>
+                    </div>
+
+                    <!-- 文件上传进度 (默认隐藏) -->
+                    <div id="file-upload-progress" class="hidden mt-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span id="uploading-filename" class="text-sm font-medium"></span>
+                            <span id="upload-progress-percent" class="text-sm text-primary">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="upload-progress-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 文件列表 -->
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">文件列表</h3>
+                        <div class="flex gap-2">
+                            <div class="relative">
+                                <input type="text" id="file-search" placeholder="搜索文件..."
+                                       class="pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-48">
+                                <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                            </div>
+                            <select id="file-filter"
+                                    class="px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                                <option value="all">所有文件</option>
+                                <option value="txt">文本文件</option>
+                                <option value="pdf">PDF文件</option>
+                                <option value="docx">Word文件</option>
+                                <option value="image">图像文件</option>
+                                <option value="audio">音频文件</option>
+                                <option value="video">视频文件</option>
+                                <option value="zip">压缩文件</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-3 font-medium">文件名</th>
+                                <th class="pb-3 font-medium">大小</th>
+                                <th class="pb-3 font-medium">类型</th>
+                                <th class="pb-3 font-medium">上传时间</th>
+                                <th class="pb-3 font-medium">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="file-table">
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-gray-500">
+                                    <i class="fa fa-file-o text-3xl mb-2"></i>
+                                    <p>暂无上传的文件</p>
+                                    <p class="text-sm mt-1">点击"上传文件"按钮开始上传</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分页控件 -->
+                    <div class="flex justify-between items-center mt-6">
+                        <div class="text-sm text-gray-500">
+                            显示 <span id="file-showing-range">0-0</span> 条，共 <span id="file-total-count">0</span> 条
+                        </div>
+                        <div class="flex gap-1">
+                            <button id="file-prev-page"
+                                    class="btn btn-outline px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                <i class="fa fa-chevron-left text-sm"></i>
+                            </button>
+                            <button id="file-next-page"
+                                    class="btn btn-outline px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                <i class="fa fa-chevron-right text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 知识图谱视图 -->
+            <div id="kg-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">知识图谱</h2>
+                        <p class="text-gray-500">创建、管理和查询知识图谱</p>
+                    </div>
+                    <button class="btn btn-primary" id="create-kg-btn">
+                        <i class="fa fa-plus"></i>
+                        <span>创建知识图谱</span>
+                    </button>
+                </div>
+
+                <!-- 知识图谱列表 -->
+                <div class="card p-6 mb-6" id="kg-list-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">知识图谱列表</h3>
+                        <div class="relative">
+                            <input type="text" id="kg-search" placeholder="搜索知识图谱..."
+                                   class="pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-48">
+                            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-3 font-medium">名称</th>
+                                <th class="pb-3 font-medium">实体数</th>
+                                <th class="pb-3 font-medium">关系数</th>
+                                <th class="pb-3 font-medium">创建时间</th>
+                                <th class="pb-3 font-medium">状态</th>
+                                <th class="pb-3 font-medium">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="kg-table">
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-gray-500">
+                                    <i class="fa fa-sitemap text-3xl mb-2"></i>
+                                    <p>暂无知识图谱</p>
+                                    <p class="text-sm mt-1">点击"创建知识图谱"按钮开始创建</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 知识图谱详情与可视化 (默认隐藏) -->
+                <div id="kg-detail-section" class="hidden">
+                    <div class="card p-6 mb-6">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 class="font-bold text-lg" id="kg-detail-name">知识图谱详情</h3>
+                                <p class="text-gray-500 text-sm" id="kg-detail-meta">创建于 2023-06-15 · 包含 120 个实体
+                                    · 230 个关系</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn btn-outline" id="kg-refresh-btn">
+                                    <i class="fa fa-refresh"></i>
+                                    <span>刷新</span>
+                                </button>
+                                <button class="btn btn-outline" id="kg-back-btn">
+                                    <i class="fa fa-trash"></i>
+                                    <span>关闭详情</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 知识图谱操作 -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <h4 class="font-medium mb-2 flex items-center">
+                                    <i class="fa fa-search text-primary mr-2"></i>
+                                    图谱查询
+                                </h4>
+                                <p class="text-sm text-gray-500 mb-3">查询知识图谱中的实体和关系</p>
+                                <button class="btn btn-outline text-sm w-full" id="kg-query-btn">
+                                    <i class="fa fa-search"></i>
+                                    <span>查询图谱</span>
+                                </button>
+                            </div>
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <h4 class="font-medium mb-2 flex items-center">
+                                    <i class="fa fa-comments text-accent mr-2"></i>
+                                    问答对话
+                                </h4>
+                                <p class="text-sm text-gray-500 mb-3">基于知识图谱进行智能问答</p>
+                                <button class="btn btn-outline text-sm w-full" id="kg-qa-btn">
+                                    <i class="fa fa-comments"></i>
+                                    <span>开始对话</span>
+                                </button>
+                            </div>
+                            <div class="border border-gray-100 rounded-lg p-4">
+                                <h4 class="font-medium mb-2 flex items-center">
+                                    <i class="fa fa-download text-secondary mr-2"></i>
+                                    导出数据
+                                </h4>
+                                <p class="text-sm text-gray-500 mb-3">导出知识图谱数据用于分析</p>
+                                <button class="btn btn-outline text-sm w-full" id="kg-export-btn">
+                                    <i class="fa fa-download"></i>
+                                    <span>导出数据</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 知识图谱可视化 -->
+                        <div>
+                            <h4 class="font-medium mb-4">知识图谱可视化</h4>
+                            <div class="border border-gray-200 rounded-lg h-96 bg-gray-50" id="kg-visualization">
+                                <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                    <div class="text-center">
+                                        <i class="fa fa-project-diagram text-4xl mb-3"></i>
+                                        <p>选择知识图谱查看可视化效果</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 问答对话视图 -->
+            <div id="qa-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">问答对话</h2>
+                        <p class="text-gray-500">与知识图谱进行智能对话</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="qa-kg-select"
+                                class="px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                            <option value="">选择知识图谱</option>
+                            <!-- 动态填充知识图谱列表 -->
+                        </select>
+                        <button class="btn btn-outline" id="qa-clear-history">
+                            <i class="fa fa-trash"></i>
+                            <span>清空历史</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 问答对话区域 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 对话历史 -->
+                    <div class="lg:col-span-2">
+                        <div class="card h-full flex flex-col">
+                            <div class="p-4 border-b border-gray-100">
+                                <h3 class="font-bold">对话历史</h3>
+                            </div>
+                            <div id="chat-history" class="flex-1 p-4 overflow-y-auto space-y-6">
+                                <div class="text-center text-gray-500 py-10">
+                                    <i class="fa fa-comments-o text-4xl mb-3"></i>
+                                    <p>请先选择一个知识图谱开始对话</p>
+                                </div>
+                            </div>
+                            <div class="p-4 border-t border-gray-100">
+                                <div class="flex gap-2">
+                                    <input type="text" id="question-input" class="input" placeholder="请输入您的问题..."
+                                           disabled>
+                                    <button id="send-question" class="btn btn-primary" disabled>
+                                        <i class="fa fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 相关实体与关系 -->
+                    <div>
+                        <div class="card h-full flex flex-col">
+                            <div class="p-4 border-b border-gray-100">
+                                <h3 class="font-bold">相关实体与关系</h3>
+                            </div>
+                            <div class="flex-1 p-4 overflow-y-auto">
+                                <div id="related-entities" class="mb-6">
+                                    <h4 class="font-medium text-sm text-gray-500 mb-3">实体</h4>
+                                    <div class="space-y-2" id="entities-container">
+                                        <p class="text-gray-500 text-sm italic">暂无相关实体</p>
+                                    </div>
+                                </div>
+                                <div id="related-relations">
+                                    <h4 class="font-medium text-sm text-gray-500 mb-3">关系</h4>
+                                    <div class="space-y-2" id="relations-container">
+                                        <p class="text-gray-500 text-sm italic">暂无相关关系</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RAG视图 -->
+            <div id="rag-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">RAG - 检索增强生成</h2>
+                        <p class="text-gray-500">基于文档检索的智能问答系统</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="rag-collection-select" class="input">
+                            <option value="">选择文档集合</option>
+                            <!-- 动态填充 -->
+                        </select>
+                        <button class="btn btn-primary" id="create-rag-collection">
+                            <i class="fa fa-plus"></i>
+                            <span>新建集合</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 左侧：文档管理 -->
+                    <div class="lg:col-span-1">
+                        <div class="card p-6 mb-6">
+                            <h3 class="font-bold text-lg mb-4">文档管理</h3>
+                            <div class="mb-4">
+                                <label class="form-label">选择文档</label>
+                                <select id="rag-document-select" class="input" multiple size="5">
+                                    <!-- 动态填充 -->
+                                </select>
+                            </div>
+                            <button class="btn btn-outline w-full mb-4" id="rag-add-document">
+                                <i class="fa fa-plus"></i>
+                                <span>添加文档到集合</span>
+                            </button>
+                            <button class="btn btn-outline w-full" id="rag-remove-document">
+                                <i class="fa fa-trash"></i>
+                                <span>从集合移除</span>
+                            </button>
+                        </div>
+
+                        <div class="card p-6">
+                            <h3 class="font-bold text-lg mb-4">检索设置</h3>
+                            <div class="mb-4">
+                                <label class="form-label">检索模式</label>
+                                <select id="rag-mode" class="input">
+                                    <option value="hybrid">混合检索 (语义+关键词)</option>
+                                    <option value="semantic">语义检索</option>
+                                    <option value="keyword">关键词检索</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">返回结果数量</label>
+                                <input type="number" id="rag-top-k" class="input" value="5" min="1" max="10">
+                            </div>
+                            <div class="flex items-center mb-4">
+                                <input type="checkbox" id="rag-show-sources" class="w-4 h-4 text-primary rounded"
+                                       checked>
+                                <label for="rag-show-sources" class="ml-2 text-sm">显示来源文档</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：问答区域 -->
+                    <div class="lg:col-span-2">
+                        <div class="card h-full flex flex-col">
+                            <div class="p-4 border-b border-gray-100">
+                                <h3 class="font-bold">RAG 问答</h3>
+                            </div>
+                            <div id="rag-chat-history" class="flex-1 p-4 overflow-y-auto space-y-6">
+                                <div class="text-center text-gray-500 py-10">
+                                    <i class="fa fa-search text-4xl mb-3"></i>
+                                    <p>请先选择一个文档集合开始问答</p>
+                                </div>
+                            </div>
+                            <div class="p-4 border-t border-gray-100">
+                                <div class="flex gap-2">
+                                    <input type="text" id="rag-question-input" class="input"
+                                           placeholder="请输入您的问题..." disabled>
+                                    <button id="rag-send-question" class="btn btn-primary" disabled>
+                                        <i class="fa fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MCP视图 -->
+            <div id="mcp-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">MCP - 模型控制平台</h2>
+                        <p class="text-gray-500">管理和配置AI模型服务</p>
+                    </div>
+                    <button class="btn btn-primary" id="add-model-btn">
+                        <i class="fa fa-plus"></i>
+                        <span>添加模型</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- 模型列表 -->
+                    <div class="lg:col-span-1">
+                        <div class="card p-6">
+                            <h3 class="font-bold text-lg mb-4">模型列表</h3>
+                            <div class="space-y-3" id="model-list">
+                                <!-- 动态填充 -->
+                                <div class="text-center text-gray-500 py-4">
+                                    <i class="fa fa-cube text-2xl mb-2"></i>
+                                    <p class="text-sm">暂无配置的模型</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模型详情和配置 -->
+                    <div class="lg:col-span-3">
+                        <div class="card p-6">
+                            <div id="mcp-no-selection" class="text-center py-10">
+                                <i class="fa fa-cog text-4xl text-gray-300 mb-3"></i>
+                                <h3 class="text-lg font-medium text-gray-500">选择或添加模型进行配置</h3>
+                            </div>
+
+                            <div id="mcp-model-detail" class="hidden">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="font-bold text-lg" id="model-detail-name">模型名称</h3>
+                                    <div class="flex gap-2">
+                                        <button class="btn btn-outline" id="test-model-btn">
+                                            <i class="fa fa-bolt"></i>
+                                            <span>测试连接</span>
+                                        </button>
+                                        <button class="btn btn-outline text-danger" id="delete-model-btn">
+                                            <i class="fa fa-trash"></i>
+                                            <span>删除</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <form id="model-config-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="form-label">模型名称</label>
+                                        <input type="text" id="model-name" class="input" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">模型类型</label>
+                                        <select id="model-type" class="input" required>
+                                            <option value="openai">OpenAI API</option>
+                                            <option value="azure">Azure OpenAI</option>
+                                            <option value="huggingface">HuggingFace</option>
+                                            <option value="custom">自定义API</option>
+                                            <option value="local">本地模型</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">API密钥</label>
+                                        <input type="password" id="model-api-key" class="input"
+                                               placeholder="请输入API密钥">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">基础URL</label>
+                                        <input type="text" id="model-base-url" class="input"
+                                               placeholder="https://api.openai.com/v1">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">模型名称</label>
+                                        <input type="text" id="model-model-name" class="input"
+                                               placeholder="gpt-3.5-turbo">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">最大token数</label>
+                                        <input type="number" id="model-max-tokens" class="input" value="2048" min="1"
+                                               max="4096">
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="form-label">其他参数</label>
+                                        <textarea id="model-extra-params" class="input" rows="3"
+                                                  placeholder='{"temperature": 0.7}'></textarea>
+                                    </div>
+                                    <div class="md:col-span-2 flex justify-end">
+                                        <button type="submit" class="btn btn-primary">保存配置</button>
+                                    </div>
+                                </form>
+
+                                <!-- 模型测试区域 -->
+                                <div class="mt-8 pt-6 border-t border-gray-100">
+                                    <h4 class="font-medium mb-4">模型测试</h4>
+                                    <div class="flex gap-2 mb-4">
+                                        <input type="text" id="model-test-input" class="input"
+                                               placeholder="输入测试提示词">
+                                        <button id="model-test-run" class="btn btn-outline">运行测试</button>
+                                    </div>
+                                    <div id="model-test-output" class="bg-gray-50 p-4 rounded-lg min-h-[100px]">
+                                        <p class="text-gray-500 text-sm">测试结果将显示在这里</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- SQL查询视图 -->
+            <div id="sql-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">数据库查询</h2>
+                        <p class="text-gray-500">使用自然语言查询数据库</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="sql-database-select" class="input">
+                            <option value="">选择数据库</option>
+                            <option value="mysql">MySQL</option>
+                            <option value="postgresql">PostgreSQL</option>
+                            <option value="sqlite">SQLite</option>
+                            <option value="sqlite">kingbase</option>
+                            <option value="sqlite">dm8</option>
+                        </select>
+                        <button class="btn btn-primary" id="connect-database-btn">
+                            <i class="fa fa-plug"></i>
+                            <span>连接数据库</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- 数据库连接配置 -->
+                    <div class="card p-6">
+                        <h3 class="font-bold text-lg mb-4">数据库连接</h3>
+                        <form id="database-connection-form" class="space-y-4">
+                            <div>
+                                <label class="form-label">主机地址</label>
+                                <input type="text" id="db-host" class="input" placeholder="localhost">
+                            </div>
+                            <div>
+                                <label class="form-label">端口</label>
+                                <input type="number" id="db-port" class="input" placeholder="3306">
+                            </div>
+                            <div>
+                                <label class="form-label">数据库名</label>
+                                <input type="text" id="db-name" class="input" placeholder="数据库名称">
+                            </div>
+                            <div>
+                                <label class="form-table">数据库表名</label>
+                                <input type="text" id="table-name" class="input" placeholder="数据表名称">
+                            </div>
+                            <div>
+                                <label class="form-label">用户名</label>
+                                <input type="text" id="db-username" class="input" placeholder="用户名">
+                            </div>
+                            <div>
+                                <label class="form-label">密码</label>
+                                <input type="password" id="db-password" class="input" placeholder="密码">
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit" class="btn btn-primary">保存连接</button>
+                                <button type="button" id="test-db-connection" class="btn btn-outline">测试连接</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- 查询区域 -->
+                    <div class="card p-6">
+                        <h3 class="font-bold text-lg mb-4">自然语言查询</h3>
+                        <div class="mb-4">
+                            <label class="form-label">输入您的查询问题</label>
+                            <textarea id="nl-query-input" class="input" rows="3"
+                                      placeholder="例如：显示最近一个月销量最高的产品"></textarea>
+                        </div>
+                        <div class="flex gap-2 mb-4">
+                            <button id="generate-sql-btn" class="btn btn-primary" disabled>
+                                <i class="fa fa-magic"></i>
+                                <span>生成SQL</span>
+                            </button>
+                            <button id="execute-sql-btn" class="btn btn-outline" disabled>
+                                <i class="fa fa-play"></i>
+                                <span>执行查询</span>
+                            </button>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">生成的SQL语句</label>
+                            <div class="relative">
+                                <pre id="generated-sql"
+                                     class="bg-gray-800 text-green-400 p-4 rounded-lg overflow-x-auto text-sm"></pre>
+                                <button id="copy-sql-btn"
+                                        class="absolute top-2 right-2 bg-gray-700 text-white p-1 rounded text-xs">
+                                    <i class="fa fa-copy"></i> 复制
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="form-label">查询结果</label>
+                            <div id="query-results" class="bg-gray-50 p-4 rounded-lg min-h-[100px] overflow-x-auto">
+                                <p class="text-gray-500 text-sm">查询结果将显示在这里</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 数据集制作视图 -->
+            <div id="data-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">微调数据转换</h2>
+                        <p class="text-gray-500">将不同格式的数据转换为Alpaca格式的微调数据集</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="convert-type-select" class="input">
+                            <option value="file">JSON/CSV文件</option>
+                            <option value="unstructured">非结构化文件</option>
+                            <option value="sql">SQL数据库</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!--                //-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+
+                <!-- JSON转换表单 -->
+                <div id="json-convert-form" class="space-y-4 hidden">
+                    <div>
+                        <label class="form-label">选择JSON文件</label>
+                        <select id="json-file-select" class="input">
+                            <option value="">请选择JSON文件</option>
+                            <!-- 动态填充JSON文件选项 -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">JSON结构类型</label>
+                        <select id="json-structure-type" class="input">
+                            <option value="qa">问答对格式</option>
+                            <option value="instruction">指令-回复格式</option>
+                            <option value="custom">自定义格式</option>
+                        </select>
+                    </div>
+                    <div id="json-custom-fields" class="hidden space-y-2">
+                        <label class="form-label">自定义字段映射</label>
+                        <textarea id="json-field-mapping" class="input" rows="3"
+                                  placeholder='{"instruction": "question", "input": "context", "output": "answer"}'></textarea>
+                        <p class="text-sm text-gray-500">请输入JSON字段到Alpaca格式的映射关系</p>
+                    </div>
+                    <div>
+                        <label class="form-label">输出文件路径</label>
+                        <input type="text" id="json-output-path" class="input"
+                               placeholder="输出文件路径，例如: /datasets/alpaca_data.json">
+                    </div>
+                    <button id="json-convert-btn" class="btn btn-primary w-full">
+                        <i class="fa fa-cog"></i>
+                        <span>转换JSON文件</span>
+                    </button>
+                </div>
+                <!--                //&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 左侧：转换配置 -->
+                    <div class="lg:col-span-1">
+                        <div class="card p-6 mb-6">
+                            <h3 class="font-bold text-lg mb-4">转换配置</h3>
+
+                            <!-- 文件转换表单 -->
+                            <div id="file-convert-form" class="space-y-4">
+                                <div>
+                                    <label class="form-label">选择文件</label>
+                                    <select id="file-select" class="input">
+                                        <option value="">请选择文件</option>
+                                        <!-- 动态填充文件选项 -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">文件格式</label>
+                                    <select id="file-format" class="input">
+                                        <option value="json">JSON</option>
+                                        <option value="csv">CSV</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 非结构化文件转换表单 -->
+                            <div id="unstructured-convert-form" class="space-y-4 hidden">
+                                <div>
+                                    <label class="form-label">选择文件</label>
+                                    <select id="unstructured-file-select" class="input">
+                                        <option value="">请选择文件</option>
+                                        <!-- 动态填充非结构化文件选项 -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">文件格式</label>
+                                    <select id="unstructured-format" class="input">
+                                        <option value="pdf">PDF</option>
+                                        <option value="txt">TXT</option>
+                                        <option value="docx">DOCX</option>
+                                        <option value="doc">DOC</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- SQL数据库转换表单 -->
+                            <div id="sql-convert-form" class="space-y-4 hidden">
+                                <div>
+                                    <label class="form-label">数据库类型</label>
+                                    <select id="sql-db-type" class="input">
+                                        <option value="mysql">MySQL</option>
+                                        <option value="postgresql">PostgreSQL</option>
+                                        <option value="sqlite">SQLite</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">主机地址</label>
+                                    <input type="text" id="sql-host" class="input" placeholder="localhost">
+                                </div>
+                                <div>
+                                    <label class="form-label">端口</label>
+                                    <input type="number" id="sql-port" class="input" placeholder="3306">
+                                </div>
+                                <div>
+                                    <label class="form-label">数据库名</label>
+                                    <input type="text" id="sql-database" class="input" placeholder="数据库名称">
+                                </div>
+                                <div>
+                                    <label class="form-label">用户名</label>
+                                    <input type="text" id="sql-username" class="input" placeholder="用户名">
+                                </div>
+                                <div>
+                                    <label class="form-label">密码</label>
+                                    <input type="password" id="sql-password" class="input" placeholder="密码">
+                                </div>
+                                <div>
+                                    <label class="form-label">查询语句</label>
+                                    <textarea id="sql-query" class="input" rows="3"
+                                              placeholder="SELECT * FROM table"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="form-label">输出文件路径</label>
+                                <input type="text" id="output-path" class="input"
+                                       placeholder="输出文件路径，例如: /datasets/alpaca_data.json">
+                            </div>
+
+                            <button id="start-convert-btn" class="btn btn-primary w-full mt-6">
+                                <i class="fa fa-cog"></i>
+                                <span>开始转换</span>
+                            </button>
+                        </div>
+
+                        <div class="card p-6">
+                            <h3 class="font-bold text-lg mb-4">转换历史</h3>
+                            <div class="space-y-2" id="convert-history">
+                                <div class="text-center text-gray-500 py-4">
+                                    <i class="fa fa-history text-2xl mb-2"></i>
+                                    <p class="text-sm">暂无转换历史</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：转换结果和日志 -->
+                    <div class="lg:col-span-2">
+                        <div class="card p-6">
+                            <h3 class="font-bold text-lg mb-4">转换结果</h3>
+                            <div id="convert-result" class="bg-gray-50 p-4 rounded-lg min-h-[200px]">
+                                <div class="text-center text-gray-500 py-10">
+                                    <i class="fa fa-file-text-o text-4xl mb-3"></i>
+                                    <p>转换结果将显示在这里</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card p-6 mt-6">
+                            <h3 class="font-bold text-lg mb-4">转换日志</h3>
+                            <div id="convert-log"
+                                 class="bg-gray-900 text-green-400 p-4 rounded-lg h-64 overflow-y-auto font-mono text-sm">
+                                <div class="text-center text-gray-500 py-10">
+                                    <i class="fa fa-terminal text-4xl mb-3"></i>
+                                    <p>日志将显示在这里</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 在现有HTML中添加健康监测视图 -->
+            <div id="health-view" class="view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">健康监测</h2>
+                        <p class="text-gray-500">实时监测健康状况，紧急情况下自动求助</p>
+                    </div>
+                    <button class="btn btn-primary" id="add-health-device">
+                        <i class="fa fa-plus"></i>
+                        <span>添加健康设备</span>
+                    </button>
+                </div>
+
+                <!-- 健康数据仪表盘 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">当前心率</p>
+                                <h3 class="text-3xl font-bold mt-1" id="current-heart-rate">--</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-danger/10 flex items-center justify-center text-danger">
+                                <i class="fa fa-heartbeat text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">上次更新: <span id="heart-rate-time">--</span></div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">血氧饱和度</p>
+                                <h3 class="text-3xl font-bold mt-1" id="current-blood-oxygen">--</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                <i class="fa fa-lungs text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">上次更新: <span id="blood-oxygen-time">--</span></div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">血压</p>
+                                <h3 class="text-3xl font-bold mt-1" id="current-blood-pressure">--/--</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                                <i class="fa fa-tint text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">上次更新: <span id="blood-pressure-time">--</span></div>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm">状态</p>
+                                <h3 class="text-3xl font-bold mt-1" id="health-status">正常</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                                <i class="fa fa-check-circle text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">持续监测中</div>
+                    </div>
+                </div>
+
+                <!-- 紧急求助面板 -->
+                <div class="card p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">紧急求助</h3>
+                        <button class="btn btn-outline" id="test-emergency-btn">
+                            <i class="fa fa-bell"></i>
+                            <span>测试紧急求助</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="border border-gray-100 rounded-lg p-4 text-center">
+                            <div class="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                                <i class="fa fa-user-friends text-2xl"></i>
+                            </div>
+                            <h4 class="font-medium mb-1">紧急联系人</h4>
+                            <p class="text-sm text-gray-500 mb-3">已设置 <span id="emergency-contacts-count">0</span>
+                                位联系人</p>
+                            <button class="btn btn-outline text-sm w-full" id="manage-contacts-btn">
+                                <i class="fa fa-cog"></i>
+                                <span>管理联系人</span>
+                            </button>
+                        </div>
+
+                        <div class="border border-gray-100 rounded-lg p-4 text-center">
+                            <div class="w-16 h-16 mx-auto rounded-full bg-success/10 flex items-center justify-center text-success mb-3">
+                                <i class="fa fa-ambulance text-2xl"></i>
+                            </div>
+                            <h4 class="font-medium mb-1">急救中心</h4>
+                            <p class="text-sm text-gray-500 mb-3">紧急情况下自动呼叫</p>
+                            <button class="btn btn-outline text-sm w-full" id="emergency-settings-btn">
+                                <i class="fa fa-sliders"></i>
+                                <span>设置</span>
+                            </button>
+                        </div>
+
+                        <div class="border border-gray-100 rounded-lg p-4 text-center">
+                            <div class="w-16 h-16 mx-auto rounded-full bg-accent/10 flex items-center justify-center text-accent mb-3">
+                                <i class="fa fa-hospital text-2xl"></i>
+                            </div>
+                            <h4 class="font-medium mb-1">医疗机构</h4>
+                            <p class="text-sm text-gray-500 mb-3">已关联 <span id="linked-hospitals-count">0</span> 家医院
+                            </p>
+                            <button class="btn btn-outline text-sm w-full" id="link-hospital-btn">
+                                <i class="fa fa-link"></i>
+                                <span>关联医院</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 紧急求助按钮 -->
+                    <div class="mt-6 text-center">
+                        <button id="emergency-button"
+                                class="w-32 h-32 rounded-full bg-danger hover:bg-danger/90 text-white flex flex-col items-center justify-center">
+                            <i class="fa fa-bell text-3xl mb-2"></i>
+                            <span class="font-bold">紧急求助</span>
+                        </button>
+                        <p class="text-sm text-gray-500 mt-3">长按3秒或连续点击3次触发紧急求助</p>
+                    </div>
+                </div>
+
+                <!-- 健康数据历史 -->
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg">健康数据历史</h3>
+                        <div class="flex gap-2">
+                            <select id="health-data-type" class="input">
+                                <option value="all">所有数据</option>
+                                <option value="heart_rate">心率</option>
+                                <option value="blood_oxygen">血氧</option>
+                                <option value="blood_pressure">血压</option>
+                                <option value="glucose">血糖</option>
+                            </select>
+                            <select id="health-data-range" class="input">
+                                <option value="today">今天</option>
+                                <option value="week" selected>近一周</option>
+                                <option value="month">近一个月</option>
+                                <option value="year">近一年</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="h-80">
+                        <canvas id="health-data-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 紧急联系人管理模态框 -->
+            <div id="emergency-contacts-modal"
+                 class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+                <!-- 模态框内容 -->
+            </div>
+
+
+            <!-- 智能体视图 -->
+            <div id="agent-view" class="view p-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">智能体</h2>
+                        <p class="text-gray-500">与智能体进行对话和管理</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="btn btn-outline" id="clear-agent-memory">
+                            <i class="fa fa-trash"></i>
+                            <span>清除记忆</span>
+                        </button>
+                        <button class="btn btn-primary" id="refresh-agent-tools">
+                            <i class="fa fa-refresh"></i>
+                            <span>刷新工具</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- 工具列表 -->
+                    <div class="lg:col-span-1">
+                        <div class="card p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-lg">可用工具</h3>
+                                <span class="badge bg-primary/10 text-primary" id="tools-count">0</span>
+                            </div>
+                            <div id="agent-tools-list" class="space-y-3 max-h-96 overflow-y-auto">
+                                <div class="text-center text-gray-500 py-4">
+                                    <i class="fa fa-cogs text-2xl mb-2"></i>
+                                    <p class="text-sm">正在加载工具...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 会话管理 -->
+                        <div class="card p-6 mt-6">
+                            <h3 class="font-bold text-lg mb-4">会话管理</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="form-label text-sm">会话ID</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="session-id-input" class="input flex-1"
+                                               placeholder="会话ID">
+                                        <button class="btn btn-outline" id="generate-session-id">
+                                            <i class="fa fa-key"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline w-full" id="copy-session-id">
+                                    <i class="fa fa-copy"></i>
+                                    <span>复制会话ID</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 对话区域 -->
+                    <div class="lg:col-span-3">
+                        <div class="card h-full flex flex-col">
+                            <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                                <h3 class="font-bold">智能体对话</h3>
+                                <span class="text-sm text-gray-500" id="current-session-display">新会话</span>
+                            </div>
+                            <div id="agent-chat-history" class="flex-1 p-4 overflow-y-auto space-y-6 min-h-[400px]">
+                                <div class="text-center text-gray-500 py-10">
+                                    <i class="fa fa-robot text-4xl mb-3"></i>
+                                    <p>开始与智能体对话</p>
+                                    <p class="text-sm mt-1">支持上下文会话和工具调用</p>
+                                </div>
+                            </div>
+                            <div class="p-4 border-t border-gray-100">
+                                <div class="flex gap-2">
+                                    <input type="text" id="agent-query-input" class="input flex-1"
+                                           placeholder="向智能体提问..." autocomplete="off">
+                                    <button id="send-agent-query" class="btn btn-primary">
+                                        <i class="fa fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+</div>
+
+<!-- 创建知识图谱模态框 (默认隐藏) -->
+<div id="create-kg-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold">创建知识图谱</h3>
+            <button id="close-kg-modal" class="text-gray-400 hover:text-gray-600">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <form id="create-kg-form" class="space-y-5">
+                <div>
+                    <label class="form-label">知识图谱名称 *</label>
+                    <input type="text" id="kg-name" class="input" placeholder="请输入知识图谱名称" required>
+                </div>
+
+                <div>
+                    <label class="form-label">选择文件 *</label>
+                    <p class="text-sm text-gray-500 mb-2">请选择用于构建知识图谱的文件（可多选）</p>
+                    <div class="border border-gray-200 rounded-lg p-4 max-h-40 overflow-y-auto"
+                         id="file-selection-container">
+                        <p class="text-gray-500 text-sm italic">暂无上传的文件，请先上传文件</p>
+                        <!-- 动态填充文件选择框 -->
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">算法配置</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label text-sm">实体抽取算法</label>
+                            <select id="entity-extraction" class="input">
+                                <option value="bert">BERT</option>
+                                <option value="crf">CRF</option>
+                                <option value="qwen" selected>Qwen</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label text-sm">关系抽取算法</label>
+                            <select id="relation-extraction" class="input">
+                                <option value="bert">BERT</option>
+                                <option value="qwen" selected>Qwen</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label text-sm">知识补全算法</label>
+                            <select id="knowledge-completion" class="input">
+                                <option value="transe" selected>TransE</option>
+                                <option value="distmult">DistMult</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label text-sm">预处理算法</label>
+                            <select id="preprocess" class="input">
+                                <option value="simhash" selected>SimHash</option>
+                                <option value="minhash">MinHash</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">高级选项</label>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="enable-completion" class="w-4 h-4 text-primary rounded" checked>
+                            <label for="enable-completion" class="ml-2 text-sm">启用知识补全</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="enable-visualization" class="w-4 h-4 text-primary rounded"
+                                   checked>
+                            <label for="enable-visualization" class="ml-2 text-sm">启用可视化</label>
+                        </div>
+                        <div>
+                            <label class="form-label text-sm">模型API密钥（可选）</label>
+                            <input type="text" id="model-api-keys" class="input"
+                                   placeholder="如果需要使用外部API，请输入密钥">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="p-6 border-t border-gray-100 flex justify-end gap-3">
+            <button id="cancel-kg-create" class="btn btn-outline">取消</button>
+            <button id="submit-kg-create" class="btn btn-primary">创建知识图谱</button>
+        </div>
+    </div>
+</div>
+
+<!-- 知识图谱查询模态框 (默认隐藏) -->
+<div id="kg-query-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold">知识图谱查询</h3>
+            <button id="close-query-modal" class="text-gray-400 hover:text-gray-600">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <form id="kg-query-form" class="space-y-5">
+                <div>
+                    <label class="form-label">查询内容 *</label>
+                    <input type="text" id="query-content" class="input" placeholder="请输入查询内容（实体或关系）"
+                           required>
+                </div>
+
+                <div>
+                    <label class="form-label">查询类型</label>
+                    <select id="query-type" class="input">
+                        <option value="natural" selected>自然语言查询</option>
+                        <option value="cypher">Cypher查询</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">查询选项</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label text-sm">返回结果数量</label>
+                            <input type="number" id="query-top-k" class="input" min="1" max="100" value="10">
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="include-entities" class="w-4 h-4 text-primary rounded"
+                                       checked>
+                                <label for="include-entities" class="ml-2 text-sm">包含实体</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="include-relations" class="w-4 h-4 text-primary rounded"
+                                       checked>
+                                <label for="include-relations" class="ml-2 text-sm">包含关系</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="p-6 border-t border-gray-100 flex justify-end gap-3">
+            <button id="cancel-query" class="btn btn-outline">取消</button>
+            <button id="submit-query" class="btn btn-primary">执行查询</button>
+        </div>
+    </div>
+</div>
+
+<!-- 查询结果模态框 (默认隐藏) -->
+<div id="query-result-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="w-full max-w-4xl bg-white rounded-xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-xl font-bold">查询结果</h3>
+            <button id="close-result-modal" class="text-gray-400 hover:text-gray-600">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6 flex-1 overflow-y-auto">
+            <div class="mb-6">
+                <h4 class="font-medium text-sm text-gray-500 mb-2">查询内容</h4>
+                <p id="result-query-content" class="bg-gray-50 p-3 rounded-lg"></p>
+            </div>
+
+            <div class="mb-6">
+                <h4 class="font-medium text-sm text-gray-500 mb-2">回答</h4>
+                <p id="result-answer" class="bg-gray-50 p-3 rounded-lg"></p>
+            </div>
+
+            <div class="mb-6">
+                <h4 class="font-medium text-sm text-gray-500 mb-2">实体 (共 <span id="entities-count">0</span> 个)</h4>
+                <div id="result-entities" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <!-- 动态填充实体 -->
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-medium text-sm text-gray-500 mb-2">关系 (共 <span id="relations-count">0</span> 个)</h4>
+                <div id="result-relations" class="space-y-3">
+                    <!-- 动态填充关系 -->
+                </div>
+            </div>
+        </div>
+        <div class="p-6 border-t border-gray-100 flex justify-end">
+            <button id="close-result" class="btn btn-primary">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 进度提示模态框 (默认隐藏) -->
+<div id="progress-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6 text-center">
+            <div class="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
+                <i class="fa fa-spinner fa-spin text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2" id="progress-title">处理中</h3>
+            <p class="text-gray-500 mb-6" id="progress-message">正在处理您的请求，请稍候...</p>
+
+            <div class="mb-2 flex justify-between items-center">
+                <span class="text-sm font-medium" id="progress-stage">准备中</span>
+                <span class="text-sm text-primary" id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 确认删除模态框 (默认隐藏) -->
+<div id="confirm-delete-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto rounded-full bg-danger/10 flex items-center justify-center text-danger mb-4">
+                    <i class="fa fa-exclamation-triangle text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">确认删除</h3>
+                <p class="text-gray-500" id="delete-confirmation-message">您确定要删除这个项目吗？此操作无法撤销。</p>
+            </div>
+
+            <div class="flex gap-3">
+                <button id="cancel-delete" class="btn btn-outline flex-1">取消</button>
+                <button id="confirm-delete" class="btn btn-primary bg-danger hover:bg-danger/90 flex-1">确认删除
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="./js/state.js"></script>
+<script type="module" src="./js/api.js"></script>
+<script type="module" src="./js/utils.js"></script>
+<script type="module" src="./js/ui.js"></script>
+<script type="module" src="./js/auth.js"></script>
+<script type="module" src="./js/user.js"></script>
+<script type="module" src="./js/file.js"></script>
+<script type="module" src="./js/knowledgeGraph.js"></script>
+<script type="module" src="./js/qa.js"></script>
+<script type="module" src="./js/database.js"></script>
+<script type="module" src="./js/convert.js"></script>
+<script type="module" src="./js/health.js"></script>
+<script type="module" src="./js/agent.js"></script>
+<script type="module" src="./js/main.js"></script>
+
+
+</body>
+</html>

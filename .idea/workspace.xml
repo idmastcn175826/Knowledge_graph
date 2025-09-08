@@ -5,50 +5,35 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="67cea049-6805-47b3-ab62-53ed05f9c9ef" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/action/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/action/action.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/agent/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/agent/agent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/factory/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/factory/tool_factory.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/llm/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/llm/llm_client.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/memory/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/memory/memory.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/observer/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/observer/observer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/perceive/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/perceive/perception.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/test_agent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/thinkings/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/thinkings/thinking_strategy.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/thinkings/thought.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/tools/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/tools/example.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/tools/test_tools.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/agent_framework/tools/weather_tool.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/api/v1/routers/health_agent_router.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/health_agent/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/health_agent/emergency_responder.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/health_agent/health_monitor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/health_agent/risk_analyzer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/models/health.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/app/utils/notification.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/app/api/v1/routers/agent_router.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/app/api/v1/routers/system_router.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/agent.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/api.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/auth.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/config.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/convert.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/database.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/file.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/health.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/knowledgeGraph.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/qa.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/state.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/ui.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/user.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/web/src/js/utils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Knowledge_graph.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Knowledge_graph.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/.env" beforeDir="false" afterPath="$PROJECT_DIR$/api/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/app/agent_framework/test_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_agent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/app/api/v1/routers/health_agent_router.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/api/v1/routers/health_agent_router.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/app/config/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/config/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/app/db/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/db/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/app/models/file.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/models/file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/app/models/schema.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/models/schema.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/app/models/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/models/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/app/rag/rag_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/models/rag_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/app/rag/rag_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/rag/rag_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/app/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/app/health_agent/health_monitor.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/health_agent/health_monitor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/app/health_agent/risk_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/app/health_agent/risk_analyzer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/app/templates/index.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/uploads/c1cb5a15-ec8e-4d9b-bf75-3a4cc419a130.pdf" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,9 +69,13 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript 调试.agent.html.executor": "Run",
+    "JavaScript 调试.health-monitoring-extension.html.executor": "Run",
+    "JavaScript 调试.index.html (1).executor": "Run",
     "JavaScript 调试.index.html.executor": "Run",
     "JavaScript 调试.indexs.html.executor": "Run",
     "JavaScript 调试.knowledge-graph-system.html.executor": "Run",
+    "JavaScript 调试.test.html.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Node.js.api.js.executor": "Run",
     "Node.js.main.js.executor": "Run",
@@ -94,16 +83,18 @@
     "Python 测试.Python 测试 (test_agent.py 内).executor": "Run",
     "Python 测试.test_agent.TestAgentController 的 Python 测试.executor": "Run",
     "Python 测试.test_agent.TestAgentController.test_process_query_without_tool 的 Python 测试.executor": "Run",
-    "Python 测试.test_agent.TestMemorySystem 的 Python 测试.executor": "ConcurrencyExecutor",
+    "Python 测试.test_agent.TestMemorySystem 的 Python 测试.executor": "Run",
     "Python 测试.test_agent.TestMemorySystem.test_add_short_term_memory 的 Python 测试.executor": "Run",
     "Python 测试.test_agent.TestMemorySystem.test_retrieve_relevant_memories 的 Python 测试.executor": "Run",
     "Python 测试.test_agent.TestToolSystem 的 Python 测试.executor": "Run",
     "Python 测试.test_agent.TestToolSystem.test_tool_execution 的 Python 测试.executor": "Run",
+    "Python.data_router.executor": "Run",
     "Python.file.executor": "Run",
     "Python.main (1).executor": "Run",
     "Python.main.executor": "Run",
     "Python.qa.executor": "Run",
     "Python.rag_service.executor": "Run",
+    "Python.system_router.executor": "Run",
     "Python.test.executor": "Run",
     "Python.test_kg.executor": "Run",
     "Python.test_user.executor": "Run",
@@ -111,7 +102,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "D:/pycharm_project/github_project/Knowledge_graph/backend/app/api",
+    "last_opened_file_path": "D:/pycharm_project/github_project/Knowledge_graph/api/logs",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -130,108 +121,51 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\pycharm_project\github_project\Knowledge_graph\api\logs" />
       <recent name="D:\pycharm_project\github_project\Knowledge_graph\backend\app\api" />
       <recent name="D:\pycharm_project\github_project\Knowledge_graph\backend\app\algorithm" />
       <recent name="D:\pycharm_project\github_project\Knowledge_graph\backend\app\algorithm\extraction" />
       <recent name="D:\pycharm_project\github_project\Knowledge_graph\backend\app\service" />
-      <recent name="D:\pycharm_project\github_project\Knowledge_graph\backend\app\core" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\pycharm_project\github_project\Knowledge_graph\api\web\src" />
+      <recent name="D:\pycharm_project\github_project\Knowledge_graph\api\app\templates\js" />
+      <recent name="D:\pycharm_project\github_project\Knowledge_graph\api\web" />
+      <recent name="D:\pycharm_project\github_project\Knowledge_graph\tests" />
       <recent name="D:\pycharm_project\github_project\Knowledge_graph\api\app\agent_framework\thinkings" />
-      <recent name="D:\pycharm_project\github_project\Knowledge_graph\api\app\agent_framework\llm" />
-      <recent name="D:\pycharm_project\github_project\Knowledge_graph\api\app\agent_framework\action" />
-      <recent name="D:\pycharm_project\github_project\Knowledge_graph\api\app\agent_framework\agent" />
-      <recent name="D:\pycharm_project\github_project\Knowledge_graph\api\app\agent_framework\perceive" />
     </key>
   </component>
-  <component name="RunManager" selected="Python 测试.test_agent.TestToolSystem 的 Python 测试">
-    <configuration name="test_agent.TestMemorySystem 的 Python 测试" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="Knowledge_graph" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/api/app/agent_framework" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_agent.TestMemorySystem&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+  <component name="RunManager" selected="JavaScript 调试.index.html">
+    <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/Knowledge_graph/web/src/index.html" useBuiltInWebServerPort="true">
       <method v="2" />
     </configuration>
-    <configuration name="test_agent.TestMemorySystem.test_add_short_term_memory 的 Python 测试" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Knowledge_graph" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/api/app/agent_framework" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/api" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_agent.TestMemorySystem.test_add_short_term_memory&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test_agent.TestMemorySystem.test_retrieve_relevant_memories 的 Python 测试" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="Knowledge_graph" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/api/app/agent_framework" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_agent.TestMemorySystem.test_retrieve_relevant_memories&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test_agent.TestToolSystem 的 Python 测试" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="Knowledge_graph" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/api/app/agent_framework" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_agent.TestToolSystem&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test_agent.TestToolSystem.test_tool_execution 的 Python 测试" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="Knowledge_graph" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/api/app/agent_framework" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_agent.TestToolSystem.test_tool_execution&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/api/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python 测试.test_agent.TestToolSystem 的 Python 测试" />
-        <item itemvalue="Python 测试.test_agent.TestMemorySystem.test_add_short_term_memory 的 Python 测试" />
-        <item itemvalue="Python 测试.test_agent.TestToolSystem.test_tool_execution 的 Python 测试" />
-        <item itemvalue="Python 测试.test_agent.TestMemorySystem.test_retrieve_relevant_memories 的 Python 测试" />
-        <item itemvalue="Python 测试.test_agent.TestMemorySystem 的 Python 测试" />
+        <item itemvalue="JavaScript 调试.index.html" />
+        <item itemvalue="Python.main" />
       </list>
     </recent_temporary>
   </component>
@@ -263,7 +197,8 @@
       <workItem from="1757054815405" duration="622000" />
       <workItem from="1757065235891" duration="14078000" />
       <workItem from="1757143849225" duration="5243000" />
-      <workItem from="1757149950149" duration="6871000" />
+      <workItem from="1757149950149" duration="14138000" />
+      <workItem from="1757298931652" duration="17668000" />
     </task>
     <servers />
   </component>
@@ -283,10 +218,12 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Knowledge_graph$main__1_.coverage" NAME="main (1) 覆盖结果" MODIFIED="1757151864255" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api/app/agent-framework" />
-    <SUITE FILE_PATH="coverage/Knowledge_graph$.coverage" NAME=" 覆盖结果" MODIFIED="1757155072025" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api/app/agent_framework" />
+    <SUITE FILE_PATH="coverage/Knowledge_graph$data_router.coverage" NAME="data_router 覆盖结果" MODIFIED="1757162468684" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api/app/api/v1/routers" />
+    <SUITE FILE_PATH="coverage/Knowledge_graph$.coverage" NAME=" 覆盖结果" MODIFIED="1757162316372" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/Knowledge_graph$system_router.coverage" NAME="system_router 覆盖结果" MODIFIED="1757345910569" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api/app/api/v1/routers" />
     <SUITE FILE_PATH="coverage/Knowledge_graph$test_kg.coverage" NAME="test_kg 覆盖结果" MODIFIED="1756535593854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/tests" />
     <SUITE FILE_PATH="coverage/Knowledge_graph$test_user.coverage" NAME="test_user 覆盖结果" MODIFIED="1756539080398" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/tests" />
-    <SUITE FILE_PATH="coverage/Knowledge_graph$main.coverage" NAME="main 覆盖结果" MODIFIED="1757154734416" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api/app/agent_framework" />
+    <SUITE FILE_PATH="coverage/Knowledge_graph$main.coverage" NAME="main 覆盖结果" MODIFIED="1757346158862" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api" />
     <SUITE FILE_PATH="coverage/Knowledge_graph$file.coverage" NAME="file 覆盖结果" MODIFIED="1756494354926" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/app/models" />
     <SUITE FILE_PATH="coverage/Knowledge_graph$rag_service.coverage" NAME="rag_service 覆盖结果" MODIFIED="1756984279500" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api/app/rag" />
     <SUITE FILE_PATH="coverage/Knowledge_graph$qa.coverage" NAME="qa 覆盖结果" MODIFIED="1756576810159" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/backend/app/api/v1/routers" />

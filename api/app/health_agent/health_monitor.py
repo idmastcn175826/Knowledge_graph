@@ -35,7 +35,11 @@ class HealthMonitorService:
             emergency_data = EmergencyEventCreate(
                 health_data_id=db_health_data.id,
                 risk_level=risk_level,
-                description=f"检测到{risk_level}级别风险"
+                # 根据实际检测到的异常类型设置具体值
+                type="abnormal_heart_rate" if health_data.heart_rate else
+                "high_blood_pressure" if (health_data.systolic_bp or health_data.diastolic_bp) else
+                "health_risk",  # 默认类型
+                description=f"健康数据检测到{risk_level}级别风险"
             )
             emergency_event = EmergencyEvent(
                 **emergency_data.dict(),

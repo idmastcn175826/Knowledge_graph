@@ -41,16 +41,16 @@ class Settings(BaseSettings):
     QWEN_MODEL_NAME: str = Field(default_factory=lambda: os.getenv("QWEN_MODEL_NAME", ""),alias="QWEN_MODEL_NAME")
     QWEN_DEFAULT_API_KEY: Optional[str] = Field(default_factory=lambda: os.getenv("QWEN_DEFAULT_API_KEY"),alias="QWEN_DEFAULT_API_KEY")
     QWEN_API_BASE_URL: str = Field(default_factory=lambda: os.getenv("QWEN_API_BASE_URL", ""),alias="QWEN_API_BASE_URL")
-    QWEN_TEMPERATURE = float(os.getenv("QWEN_TEMPERATURE", "0.7"))
-
-    #智能体配置
-    MAX_SHORT_TERM_MEMORY = int(os.getenv("MAX_SHORT_TERM_MEMORY", "100"))
+    # QWEN_TEMPERATURE = float(os.getenv("QWEN_TEMPERATURE", "0.7"))
+    #
+    # #智能体配置
+    # MAX_SHORT_TERM_MEMORY = int(os.getenv("MAX_SHORT_TERM_MEMORY", "100"))
 
 
 
     # CORS配置跨域
     cors_origins: List[str] = Field(
-        default_factory=lambda: os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(","),
+        default_factory=lambda: os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:63342").split(","),
         alias="CORS_ORIGINS")
     allowed_origins: List[str] = Field(
         default_factory=lambda: os.getenv("ALLOWED_ORIGINS", "*").split(","),
@@ -78,6 +78,10 @@ class Settings(BaseSettings):
     # 文件上传配置
     max_file_size: int = 50 * 1024 * 1024  # 50MB
     allowed_file_types: List[str] = ["txt", "pdf", "docx", "doc", "pptx", "ppt", "xlsx", "xls"]
+
+    # 健康监测默认状态配置
+    HEALTH_MONITOR_DEFAULT_ENABLED: bool = Field(default_factory=lambda: os.getenv("HEALTH_MONITOR_DEFAULT_ENABLED", "False"),
+                                                 alias="HEALTH_MONITOR_DEFAULT_ENABLED")
 
     # 验证Qwen API地址
     @field_validator('QWEN_API_BASE_URL')  # 原错误：'qwen_api_base_url'（小写）
