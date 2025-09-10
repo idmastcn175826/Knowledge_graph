@@ -1,8 +1,13 @@
 import logging
 from typing import List, Dict, Any, Optional
+import requests
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+
+from app.config.config import settings
 from app.models.rag_models import RAGCollection, RAGDocument
+from app.rag.embedding.embedding_service import EmbeddingService
 from app.rag.file_processor import FileProcessor
 from app.rag.vector_store import VectorStoreService
 from app.utils.exceptions import RAGException
@@ -28,11 +33,18 @@ class RAGService:
             # 创建数据库记录
             collection = RAGCollection(name=name, description=description)
             self.db.add(collection)
-            self.db.commit()
+            self.db.commit()  # 提交事务，获取自增ID
             self.db.refresh(collection)
 
             # 在向量数据库中创建集合
-            self.vector_store.create_collection(collection.id)
+            try:
+                self.vector_store.create_collection(collection.id)
+            except Exception as e:
+                # 关键修复：如果向量集合创建失败，回滚数据库记录
+                self.db.delete(collection)
+                self.db.commit()
+                logger.error(f"向量集合创建失败，回滚数据库记录: {str(e)}")
+                raise RAGException(f"创建集合失败: 向量存储错误 - {str(e)}")
 
             return collection
         except SQLAlchemyError as e:
@@ -52,19 +64,34 @@ class RAGService:
             logger.error(f"数据库错误: {str(e)}")
             raise RAGException("获取集合信息失败")
 
-    def list_collections(self, skip: int = 0, limit: int = 100) -> List[RAGCollection]:
-        """获取所有集合列表"""
+    def list_collections(self, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
+        """获取所有集合列表，返回包含文档计数的字典列表"""
         try:
-            collections = self.db.query(RAGCollection).offset(skip).limit(limit).all()
+            # 关键修复：使用JOIN和COUNT在数据库层面计算文档数量
+            # 避免后续对集合对象的document_count属性赋值
+            query = self.db.query(
+                RAGCollection,
+                func.count(RAGDocument.id).label('document_count')
+            ).outerjoin(
+                RAGDocument,
+                (RAGCollection.id == RAGDocument.collection_id) &
+                (RAGDocument.status == "processed")
+            ).group_by(
+                RAGCollection.id
+            ).offset(skip).limit(limit)
 
-            # 为每个集合添加文档计数
-            for collection in collections:
-                collection.document_count = self.db.query(RAGDocument).filter(
-                    RAGDocument.collection_id == collection.id,
-                    RAGDocument.status == "processed"
-                ).count()
+            # 执行查询并转换结果为字典列表
+            results = []
+            for collection, doc_count in query.all():
+                results.append({
+                    "id": collection.id,
+                    "name": collection.name,
+                    "description": collection.description,
+                    "created_at": collection.created_at,
+                    "document_count": doc_count  # 使用查询计算的文档数量
+                })
 
-            return collections
+            return results
         except SQLAlchemyError as e:
             logger.error(f"数据库错误: {str(e)}")
             raise RAGException("获取集合列表失败")
@@ -235,6 +262,17 @@ class RAGService:
     ) -> Dict[str, Any]:
         """查询RAG系统"""
         try:
+            # 验证集合是否存在
+            collection = self.get_collection(collection_id)
+            if not collection:
+                raise RAGException(f"集合 ID {collection_id} 不存在")
+
+            # 验证向量集合是否存在
+            try:
+                self.vector_store.get_collection(collection_id)
+            except Exception as e:
+                raise RAGException(f"集合向量存储不存在: {str(e)}")
+
             # 生成查询嵌入
             query_embedding = self.embedding_service.generate_embeddings([query])[0]
 
@@ -293,28 +331,50 @@ class RAGService:
             raise RAGException("查询失败")
 
     def _generate_answer(self, query: str, context_results: List[Dict]) -> tuple:
-        """使用LLM生成答案（简化实现）"""
-        # 这里应该集成您的LLM服务（如Qwen）
-        # 以下是简化实现
-
+        """使用LLM生成答案（完整实现）"""
         # 构建上下文
         context = "\n\n".join([f"来源 {i + 1}: {result['text']}" for i, result in enumerate(context_results)])
 
         # 构建提示
         prompt = f"""基于以下上下文信息，请回答用户的问题。
+        上下文信息:
+        {context}
+        用户问题: {query}
+        请提供准确、简洁的回答，并引用相关的上下文信息。如果上下文信息不足以回答问题，请如实告知。"""
 
-上下文信息:
-{context}
+        try:
+            # Qwen API信息
+            if not settings.QWEN_API_BASE_URL or not settings.QWEN_DEFAULT_API_KEY:
+                raise RAGException("Qwen模型配置不完整，请检查API地址和密钥")
 
-用户问题: {query}
+            # 调用Qwen API key
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {settings.QWEN_DEFAULT_API_KEY}"
+            }
 
-请提供准确、简洁的回答，并引用相关的上下文信息。如果上下文信息不足以回答问题，请如实告知。"""
+            payload = {
+                "model": settings.QWEN_MODEL_NAME,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.7,
+                "max_tokens": 1024
+            }
 
-        # 这里应该调用LLM API
-        # answer = llm_service.generate(prompt)
+            response = requests.post(
+                settings.QWEN_API_BASE_URL,
+                headers=headers,
+                json=payload,
+                timeout=settings.LLM_TIMEOUT  # 使用配置中的超时设置
+            )
 
-        # 模拟响应
-        answer = "这是基于您提供的文档生成的回答。在实际实现中，这里会调用LLM服务来生成准确的答案。"
-        confidence = 0.85  # 模拟置信度
+            response.raise_for_status()  # 抛出HTTP错误
+            result = response.json()
+            answer = result["choices"][0]["message"]["content"]
+            confidence = 0.85  #温度
 
-        return answer, confidence
+            return answer, confidence
+
+        except Exception as e:
+            logger.error(f"LLM服务调用失败: {str(e)}")
+            # 降级处理：返回基于上下文的简单回答
+            return f"无法生成回答: {str(e)}。相关信息: {context[:200]}...", 0.0

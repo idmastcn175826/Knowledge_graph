@@ -37,7 +37,7 @@ class LLMClient:
 
             # DashScope API 使用 messages 格式
             data = {
-                "model": "qwen-turbo",  # 或其他支持的模型
+                "model": "qwen-plus",  # 或其他支持的模型
                 "messages": [
                     {
                         "role": "system",

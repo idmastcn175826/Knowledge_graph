@@ -42,9 +42,25 @@ class Settings(BaseSettings):
     QWEN_DEFAULT_API_KEY: Optional[str] = Field(default_factory=lambda: os.getenv("QWEN_DEFAULT_API_KEY"),alias="QWEN_DEFAULT_API_KEY")
     QWEN_API_BASE_URL: str = Field(default_factory=lambda: os.getenv("QWEN_API_BASE_URL", ""),alias="QWEN_API_BASE_URL")
     # QWEN_TEMPERATURE = float(os.getenv("QWEN_TEMPERATURE", "0.7"))
-    #
+
     # #智能体配置
     # MAX_SHORT_TERM_MEMORY = int(os.getenv("MAX_SHORT_TERM_MEMORY", "100"))
+
+    # 新增：LLM服务配置
+    LLM_API_URL: str = Field(
+        default_factory=lambda: os.getenv("LLM_API_URL", "http://localhost:8000/api/llm/generate"),
+        alias="LLM_API_URL"
+    )
+    LLM_TIMEOUT: int = Field(
+        default_factory=lambda: int(os.getenv("LLM_TIMEOUT", 60)),
+        alias="LLM_TIMEOUT"
+    )
+
+    # 新增：Chroma客户端超时配置
+    CHROMA_CLIENT_TIMEOUT: int = Field(
+        default_factory=lambda: int(os.getenv("CHROMA_CLIENT_TIMEOUT", 300)),
+        alias="CHROMA_CLIENT_TIMEOUT"
+    )
 
 
 

@@ -10,8 +10,6 @@ class DatabaseType(Enum):
     DM = "dm"  # 达梦数据库
     KINGBASE = "kingbase"  # 人大金仓
 
-
-
 class BaseDatabase:
     """数据库连接基础类"""
 

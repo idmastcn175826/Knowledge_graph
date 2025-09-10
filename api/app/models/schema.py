@@ -226,3 +226,72 @@ class TaskCreate:
 
 class TaskProgressUpdate:
     pass
+
+#rag实体====================================================rag============================
+# RAG相关模型
+class RAGCollectionBase(BaseModel):
+    name: str = Field(..., max_length=100, description="集合名称")
+    description: Optional[str] = Field(None, description="集合描述")
+
+
+class RAGCollectionCreate(RAGCollectionBase):
+    pass
+
+
+class RAGCollectionUpdate(BaseModel):
+    name: Optional[str] = Field(None, max_length=100, description="集合名称")
+    description: Optional[str] = Field(None, description="集合描述")
+
+
+class RAGCollectionResponse(RAGCollectionBase):
+    id: int
+    created_at: datetime
+    # 关键修复：使用Field(default=0)而不是直接赋值，避免序列化冲突
+    document_count: int = Field(default=0, description="文档数量")
+
+    class Config:
+        from_attributes = True
+        # 明确指定datetime序列化器
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+
+class RAGDocumentResponse(BaseModel):
+    id: int
+    collection_id: int
+    filename: str
+    file_path: str
+    file_type: str
+    file_size: int
+    chunk_count: int
+    status: str
+    uploaded_at: datetime
+    processed_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+class RAGQueryResponse(BaseModel):
+    answer: str
+    sources: List[Dict[str, Any]]
+    confidence: float
+
+
+# rag请求和响应模型==================================
+class RAGQueryRequest(BaseModel):
+    collection_id: int
+    query: str
+    top_k: int = 5
+    mode: str = "hybrid"  # hybrid, semantic, keyword
+
+class CollectionQueryRequest(BaseModel):
+    """集合查询请求模型，适配/collections/{collection_id}/query接口"""
+    query: str = Field(..., description="查询文本")
+    top_k: int = Field(5, ge=1, le=100, description="返回的相关文档数量")
+    mode: str = Field("hybrid", pattern="^(hybrid|semantic|keyword)$",
+                     description="查询模式: hybrid(混合), semantic(语义), keyword(关键词)")
+

@@ -8,10 +8,9 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 
-# 从路由目录导入所有路由
 from app.api.v1.routers import (user, file, knowledge_graph, qa, data_router,
                                 sql_router, health_agent_router, agent_router,
-                                system_router)  # 新增导入system_router
+                                system_router)
 from app.api.v1.routers import rag
 from app.config.config import settings
 from app.utils.exceptions import APIException

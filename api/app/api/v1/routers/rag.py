@@ -4,6 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Backgro
 from pydantic import BaseModel
 from app.db.session import get_db
 from sqlalchemy.orm import Session
+
+from app.models.schema import RAGCollectionResponse, RAGCollectionCreate, RAGDocumentResponse, RAGQueryRequest, \
+    RAGQueryResponse, CollectionQueryRequest
 from app.rag.file_processor import FileProcessor
 from app.rag.rag_service import RAGService
 from app.utils.exceptions import RAGException
@@ -11,41 +14,6 @@ from app.utils.exceptions import RAGException
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-
-# 请求和响应模型
-class RAGCollectionCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-
-
-class RAGCollectionResponse(BaseModel):
-    id: int
-    name: str
-    description: Optional[str] = None
-    document_count: int
-    created_at: str
-
-
-class RAGQueryRequest(BaseModel):
-    collection_id: int
-    query: str
-    top_k: int = 5
-    mode: str = "hybrid"  # hybrid, semantic, keyword
-
-
-class RAGQueryResponse(BaseModel):
-    answer: str
-    sources: List[Dict[str, Any]]
-    confidence: float
-
-
-class RAGDocumentResponse(BaseModel):
-    id: int
-    filename: str
-    file_type: str
-    file_size: int
-    status: str
-    uploaded_at: str
 
 
 # 路由定义
@@ -78,10 +46,29 @@ async def list_collections(
     """获取所有RAG文档集合"""
     try:
         rag_service = RAGService(db)
+        # 现在返回的是字典列表，而非对象列表
         collections = rag_service.list_collections(skip=skip, limit=limit)
-        return collections
+
+        # 关键修复：访问字典的键而非对象的属性
+        response_list = []
+        for col in collections:
+            # 安全处理创建时间（如果已经是字符串则无需转换）
+            created_at_str = col["created_at"]
+            if hasattr(created_at_str, 'isoformat'):  # 如果还是datetime对象
+                created_at_str = created_at_str.isoformat()
+
+            response_item = {
+                "id": col["id"],  # 使用字典键访问
+                "name": col["name"],
+                "description": col.get("description"),  # 使用get方法处理可选字段
+                "document_count": col["document_count"],
+                "created_at": created_at_str
+            }
+            response_list.append(response_item)
+
+        return response_list
     except Exception as e:
-        logger.error(f"获取集合列表失败: {str(e)}")
+        logger.error(f"获取集合列表失败: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="内部服务器错误")
 
 
@@ -205,3 +192,32 @@ async def query_rag(
     except Exception as e:
         logger.error(f"查询失败: {str(e)}")
         raise HTTPException(status_code=500, detail="内部服务器错误")
+
+
+@router.post("/collections/{collection_id}/query", response_model=RAGQueryResponse)
+async def query_collection(
+        collection_id: int,
+        query_request: CollectionQueryRequest,
+        db: Session = Depends(get_db)
+):
+    """查询指定的RAG集合"""
+    try:
+        # 验证集合是否存在
+        rag_service = RAGService(db)
+        collection = rag_service.get_collection(collection_id)
+        if not collection:
+            raise HTTPException(status_code=404, detail=f"集合 ID {collection_id} 不存在")
+
+        # 执行查询
+        result = rag_service.query(
+            collection_id=collection_id,
+            query=query_request.query,
+            top_k=query_request.top_k,
+            mode=query_request.mode
+        )
+        return result
+    except RAGException as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"查询集合 {collection_id} 失败: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="查询处理失败")
